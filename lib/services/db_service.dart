@@ -9,6 +9,8 @@ class DBService {
   final String columnId = 'id';
   final String columnTitle = 'title';
   final String columnAmount = 'amount';
+  final String columnType = 'type';
+  final String columnPayment = 'payment';
   final String columnDate = 'date';
 
   DBService._privateConstructor();
@@ -32,23 +34,14 @@ class DBService {
 
   // SQL code to create the database table
   Future _onCreate(Database db, int version) async {
-    await db.execute('''CREATE TABLE $tableExpense ( 
+    await db.execute(
+        '''CREATE TABLE $tableExpense ( 
   $columnId TEXT PRIMARY KEY, 
   $columnTitle TEXT NOT NULL,
   $columnAmount DOUBLE NOT NULL,
+  $columnType TEXT NOT NULL,
+  $columnPayment TEXT NOT NULL,
   $columnDate DATE NOT NULL)''');
-  }
-
-  Future<Expense?> fetchData(String id) async {
-    Database db = await instance.database;
-    List<Map> maps = await db.query(tableExpense,
-        columns: [columnId, columnAmount, columnTitle, columnDate],
-        where: '$columnId = ?',
-        whereArgs: [id]);
-    if (maps.isNotEmpty) {
-      return Expense.fromMap(maps.first as Map<String, dynamic>);
-    }
-    return null;
   }
 
   Future<List<Expense>> fetchListData() async {
@@ -57,22 +50,40 @@ class DBService {
     return List.generate(maps.length, (i) => Expense.fromMap(maps[i]));
   }
 
+  Future<Expense?> fetchData(String id) async {
+    Database db = await instance.database;
+    List<Map> maps = await db.query(tableExpense,
+        columns: [
+          columnId,
+          columnTitle,
+          columnAmount,
+          columnType,
+          columnPayment,
+          columnDate
+        ],
+        where: '$columnId = ?',
+        whereArgs: [id]);
+    if (maps.isNotEmpty) {
+      return Expense.fromMap(maps.first as Map<String, dynamic>);
+    }
+    return null;
+  }
+
   Future<void> insertData(Map<String, dynamic> expense) async {
     Database db = await instance.database;
     await db.insert(tableExpense, expense);
-    //print(id);
-  }
-
-  Future<int> deleteData(String id) async {
-    Database db = await instance.database;
-    return await db
-        .delete(tableExpense, where: '$columnId = ?', whereArgs: [id]);
   }
 
   Future<int> updateData(Map<String, dynamic> expense) async {
     Database db = await instance.database;
     return await db.update(tableExpense, expense,
         where: '$columnId = ?', whereArgs: [expense["id"]]);
+  }
+
+  Future<int> deleteData(String id) async {
+    Database db = await instance.database;
+    return await db
+        .delete(tableExpense, where: '$columnId = ?', whereArgs: [id]);
   }
 
   Future close() async {

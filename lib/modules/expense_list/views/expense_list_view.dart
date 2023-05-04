@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expense_app/models/expense.dart';
 import 'package:flutter_expense_app/modules/expense_add/controllers/expense_add_controller.dart';
 import 'package:flutter_expense_app/modules/expense_add/views/expense_add_view.dart';
+import 'package:flutter_expense_app/modules/expense_list/local_widgets/expense_filter_dialog.dart';
 import 'package:flutter_expense_app/utils/global_functions.dart';
 
 import 'package:get/get.dart';
@@ -25,6 +26,11 @@ class ExpenseListView extends GetView<ExpenseListController> {
     controller.update();
   }
 
+  // void filterData(String val) {
+  //   controller.month = val;
+  //   controller.listData();
+  // }
+
   void addExpense() {
     Get.put(ExpenseAddController());
     Get.bottomSheet(
@@ -34,6 +40,22 @@ class ExpenseListView extends GetView<ExpenseListController> {
     });
   }
 
+  final Map<String, String> month = {
+    "0": "Semua",
+    "1": "Januari",
+    "2": "Februari",
+    "3": "Maret",
+    "4": "April",
+    "5": "Mei",
+    "6": "Juni",
+    "7": "Juli",
+    "8": "Agustus",
+    "9": "September",
+    "10": "Oktober",
+    "11": "November",
+    "12": "Desember",
+  };
+
   Widget expansionData(String date, List<Expense> data) {
     return Card(
       elevation: 3,
@@ -42,7 +64,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(date),
-            Text(rupiahFormat(controller.sumTotalperDay(data))),
+            Text(rupiahFormat(controller.totalSpend(data))),
             // Chip(label: Text(rupiahFormat(controller.sumTotalperDay(data)))),
           ],
         ),
@@ -64,8 +86,29 @@ class ExpenseListView extends GetView<ExpenseListController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(child: Text(data.title)),
-          Chip(label: Text(rupiahFormat(data.amount))),
+          Expanded(
+            child: Row(
+              children: [
+                Chip(
+                  label: Text(
+                    data.type,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: Colors.purple,
+                ),
+                SizedBox(width: 5),
+                Text(data.title),
+              ],
+            ),
+          ),
+          Chip(
+            label: Text(
+              data.payment,
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.green,
+          ),
+          Chip(label: Text(rupiahFormat(data.amount.toDouble()))),
           IconButton(
             onPressed: () async {
               bool hapus = await showConfirmationDeleteDialog();
@@ -90,8 +133,22 @@ class ExpenseListView extends GetView<ExpenseListController> {
       onPressed: addExpense,
     );
 
-    Widget filterButton = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    Widget filterButton = SizedBox(
+      height: 40,
+      child: ElevatedButton(
+        onPressed: () async {
+          var value = await showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (ctx) => ExpenseFilterDialog());
+          controller.filterData(value);
+        },
+        child: Center(child: Text("Filter")),
+      ),
+    );
+
+    Widget showButton = Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
         children: [
           Expanded(
@@ -99,19 +156,40 @@ class ExpenseListView extends GetView<ExpenseListController> {
             child: SizedBox(
               height: 40,
               child: ElevatedButton(
-                onPressed: () {},
-                child: Text("Sembunyikan Dashboard"),
+                onPressed: displayChart,
+                child: GetBuilder<ExpenseListController>(
+                  builder: (c) => Row(
+                    children: [
+                      Icon(c.showChart
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                      SizedBox(width: 10),
+                      Text("Dashboard"),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
+          const SizedBox(width: 5),
+          Expanded(child: filterButton),
           const SizedBox(width: 5),
           Expanded(
             // flex: 2,
             child: SizedBox(
               height: 40,
               child: ElevatedButton(
-                onPressed: () {},
-                child: Text("Sembunyikan List"),
+                onPressed: displayList,
+                child: GetBuilder<ExpenseListController>(
+                  builder: (c) => Row(
+                    children: [
+                      Icon(
+                          c.showList ? Icons.visibility : Icons.visibility_off),
+                      SizedBox(width: 10),
+                      Text("List"),
+                    ],
+                  ),
+                ),
               ),
             ),
           )
@@ -119,26 +197,27 @@ class ExpenseListView extends GetView<ExpenseListController> {
       ),
     );
 
-    Widget filterDropdown = Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4),
-      child: DropdownButtonFormField<String>(
-        items: [
-          DropdownMenuItem(
-            child: Text("All"),
-            value: "all",
-          ),
-          DropdownMenuItem(
-            child: Text("Januari"),
-            value: "jan",
-          ),
-        ],
-        onChanged: (val) {},
-        decoration: InputDecoration(
-          isDense: true,
-          border: OutlineInputBorder(),
-        ),
-      ),
-    );
+    // Widget filterDropdown = Padding(
+    //   padding: EdgeInsets.symmetric(horizontal: 4),
+    //   child: DropdownButtonFormField<String>(
+    //     value: "0",
+    //     items: [
+    //       ...month.entries
+    //           .map((e) => DropdownMenuItem<String>(
+    //                 child: Text(e.value),
+    //                 value: e.key,
+    //               ))
+    //           .toList()
+    //     ],
+    //     onChanged: (val) {
+    //       filterData(val!);
+    //     },
+    //     decoration: InputDecoration(
+    //       isDense: true,
+    //       border: OutlineInputBorder(),
+    //     ),
+    //   ),
+    // );
 
     Widget dashboard = Card(
       elevation: 3,
@@ -146,114 +225,45 @@ class ExpenseListView extends GetView<ExpenseListController> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: GetBuilder<ExpenseListController>(
           builder: (c) => Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Hari ini: ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+            children: controller
+                .totalSpending()
+                .entries
+                .map(
+                  (e) => Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        e.key + ": ",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(rupiahFormat(e.value)),
+                    ],
                   ),
-                  Text(rupiahFormat(controller.totalSpending()["today"])),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Minggu ini: ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(rupiahFormat(controller.totalSpending()["week"])),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Bulan ini: ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(rupiahFormat(controller.totalSpending()["month"])),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Bulan lalu: ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(rupiahFormat(controller.totalSpending()["lastMonth"])),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Tahun ini: ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(rupiahFormat(controller.totalSpending()["year"])),
-                ],
-              ),
-            ],
+                )
+                .toList(),
           ),
         ),
       ),
     );
-
-    Widget item = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(child: Text("Makan Pagi Siang Malam")),
-          Text("Rp 100.000"),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.delete,
-              color: Colors.red,
-            ),
-          ),
-        ],
-      ),
-    );
-
-    // Widget addBtn = ElevatedButton(
-    //   onPressed: () {},
-    //   child: Text("Tambah"),
-    // );
-
-    // Widget totalExpenseDate = Padding(
-    //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //     children: [
-    //       Expanded(child: SizedBox()),
-    //       // Expanded(child: Text("Total")),
-    //       Text("Total"),
-    //       const SizedBox(width: 48),
-    //       Text("Rp 1.309.000"),
-    //       const SizedBox(width: 48),
-    //     ],
-    //   ),
-    // );
 
     Widget listItem = GetBuilder<ExpenseListController>(
       init: controller..listData(),
       builder: (c) => Expanded(
         child: ListView(
           children: c.isLoading
-              ? [const CircularProgressIndicator()]
-              : [
-                  ...controller.expenseData.entries
-                      .map(
-                        (e) => expansionData(e.key, e.value),
-                      )
-                      .toList(),
-                ],
+              ? [Center(child: const CircularProgressIndicator())]
+              : controller.expenseData.entries.length == 0
+                  ? [
+                      SizedBox(height: 10),
+                      Center(child: Text("Data tidak ditemukan"))
+                    ]
+                  : [
+                      ...controller.expenseData.entries
+                          .map(
+                            (e) => expansionData(e.key, e.value),
+                          )
+                          .toList(),
+                    ],
         ),
       ),
     );
@@ -267,13 +277,15 @@ class ExpenseListView extends GetView<ExpenseListController> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: RefreshIndicator(
         onRefresh: () async => controller.listData(),
-        child: Column(children: [
-          // filterButton,
-          dashboard,
-          // filterDropdown,
-          listItem,
-          //const SizedBox(height: 75),
-        ]),
+        child: GetBuilder<ExpenseListController>(
+          builder: (c) => Column(children: [
+            showButton,
+            if (c.showChart) dashboard,
+            // filterDropdown,
+            if (c.showList) listItem,
+            //const SizedBox(height: 75),
+          ]),
+        ),
       ),
     );
   }

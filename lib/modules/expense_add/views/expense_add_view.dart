@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:intl/intl.dart';
 
@@ -14,7 +15,7 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
       return;
     }
     final enteredTitle = controller.titleController.text;
-    final enteredAmount = double.parse(controller.amountController.text);
+    final enteredAmount = int.parse(controller.amountController.text);
 
     if (enteredTitle.isEmpty || enteredAmount <= 0) {
       return;
@@ -42,10 +43,24 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
     });
   }
 
+  final List<String> dropdownType = [
+    "Makan",
+    "Kebutuhan",
+    "Lainnya",
+  ];
+
+  final List<String> dropdownPayment = [
+    "Tunai",
+    "GoPay",
+    "OVO",
+    "Dana",
+    "Bank",
+    "Lainnya",
+  ];
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ExpenseAddController>(
-      // init: controller,
       builder: (controller) => Card(
         child: Form(
           key: _formKey,
@@ -55,14 +70,49 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
+                DropdownButtonFormField<String>(
+                  value: controller.typeValue,
+                  items: [
+                    ...dropdownType
+                        .map(
+                          (e) => DropdownMenuItem<String>(
+                            child: Text(e),
+                            value: e,
+                          ),
+                        )
+                        .toList()
+                  ],
+                  decoration: const InputDecoration(labelText: 'Tipe'),
+                  onChanged: (val) {
+                    controller.typeValue = val!;
+                  },
+                ),
                 TextField(
                   decoration: const InputDecoration(labelText: 'Judul'),
                   controller: controller.titleController,
                 ),
                 TextField(
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: const InputDecoration(labelText: 'Biaya'),
                   controller: controller.amountController,
                   keyboardType: TextInputType.number,
+                ),
+                DropdownButtonFormField<String>(
+                  value: controller.paymentValue,
+                  items: [
+                    ...dropdownPayment
+                        .map(
+                          (e) => DropdownMenuItem<String>(
+                            child: Text(e),
+                            value: e,
+                          ),
+                        )
+                        .toList()
+                  ],
+                  decoration: const InputDecoration(labelText: 'Pembayaran'),
+                  onChanged: (val) {
+                    controller.paymentValue = val!;
+                  },
                 ),
                 SizedBox(
                   height: 70,

@@ -1,17 +1,66 @@
 import 'package:flutter_expense_app/models/expense.dart';
-import 'package:flutter_expense_app/services/db_service.dart';
+import 'package:flutter_expense_app/services/hive_service.dart';
 import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:get/get.dart';
 import "package:collection/collection.dart";
 import 'package:intl/intl.dart';
 
 class ExpenseListController extends GetxController {
-  DBService dbService = DBService.instance;
+  HiveService dbService = HiveService.instance;
   bool showChart = true;
   bool showList = true;
   bool isLoading = false;
-  List<Expense> listExpense = [];
-  Map<String, dynamic> expenseData = {};
+  bool isFilter = false;
+  final listExpense = <Expense>[].obs;
+  final listExpenseFilter = <Expense>[].obs;
+
+  final expenseData = <String, dynamic>{}.obs;
+
+  void listData() async {
+    isLoading = true;
+    update();
+    listExpense.value = await dbService.fetchListData();
+    if (isFilter) {
+      _groupByDate(listExpenseFilter, expenseData);
+    } else {
+      _groupByDate(listExpense, expenseData);
+    }
+    isLoading = false;
+    update();
+  }
+
+  void filterData(Map<String, String> data) {
+    if (data["type"] == "Semua" &&
+        data["payment"] == "Semua" &&
+        data["month"] == "0") {
+      isFilter = false;
+      listData();
+      return;
+    }
+    List<Expense> temp = listExpense;
+    if (data["month"] != "0") {
+      temp = temp
+          .where((element) =>
+              element.date.month == int.parse(data["month"].toString()))
+          .toList();
+    }
+    if (data["type"] != "Semua") {
+      temp = temp.where((element) => element.type == data["type"]).toList();
+    }
+    if (data["payment"] != "Semua") {
+      temp =
+          temp.where((element) => element.payment == data["payment"]).toList();
+    }
+    isFilter = true;
+    listExpenseFilter.value = temp;
+    listData();
+  }
+
+  void deleteData(String id) async {
+    await dbService.deleteData(id);
+    listData();
+    update();
+  }
 
   List<Expense> get _weekExpenses {
     return listExpense.where((tx) {
@@ -42,58 +91,43 @@ class ExpenseListController extends GetxController {
     List<Expense> yearExpense = listExpense
         .where((element) => element.date.year == DateTime.now().year)
         .toList();
-    double totalSpendingYear =
-        yearExpense.fold(0.0, (sum, item) => sum + item.amount);
+
     List<Expense> lastMonthExpense = listExpense
         .where((element) =>
             element.date.month == DateTime.now().month - 1 &&
             element.date.year == DateTime.now().year)
         .toList();
-    double totalSpendingLastMonth =
-        lastMonthExpense.fold(0.0, (sum, item) => sum + item.amount);
+
     List<Expense> monthExpense = listExpense
         .where((element) =>
             element.date.month == DateTime.now().month &&
             element.date.year == DateTime.now().year)
         .toList();
-    double totalSpendingMonth =
-        monthExpense.fold(0.0, (sum, item) => sum + item.amount);
+
     List<Expense> todayExpense = listExpense
         .where((element) =>
             element.date.day == DateTime.now().day &&
             element.date.month == DateTime.now().month &&
             element.date.year == DateTime.now().year)
         .toList();
-    double totalSpendingToday =
-        todayExpense.fold(0.0, (sum, item) => sum + item.amount);
-    double totalSpendingWeek =
-        _weekExpenses.fold(0.0, (sum, item) => sum + item.amount);
+
     return {
-      "today": totalSpendingToday,
-      "week": totalSpendingWeek,
-      "month": totalSpendingMonth,
-      "lastMonth": totalSpendingLastMonth,
-      "year": totalSpendingYear
+      "Hari ini": totalSpend(todayExpense),
+      "Minggu ini": totalSpend(_weekExpenses),
+      "Bulan ini": totalSpend(monthExpense),
+      "Bulan lalu": totalSpend(lastMonthExpense),
+      "Tahun ini": totalSpend(yearExpense)
     };
   }
 
-  void listData() async {
-    isLoading = true;
-    update();
-    listExpense = await dbService.fetchListData();
-    isLoading = false;
-    groupByDate();
-    update();
-  }
-
-  double sumTotalperDay(List<Expense> data) {
+  double totalSpend(List<Expense> data) {
     return data.fold(0.0, (sum, item) => sum + item.amount);
   }
 
-  void groupByDate() {
-    Map<String, dynamic> newMap = groupBy(listExpense,
-        (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date)).map((k, v) {
-      //var newKey = DateFormat("dd-MM-yyyy").format(k);
+  void _groupByDate(RxList<Expense> list, RxMap<String, dynamic> data) {
+    Map<String, dynamic> newMap = groupBy(
+            list, (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date))
+        .map((k, v) {
       return MapEntry(
         k,
         v.map(
@@ -107,12 +141,6 @@ class ExpenseListController extends GetxController {
         newMap.entries.toList()
           ..sort((e1, e2) =>
               stringToDateTime(e2.key).compareTo(stringToDateTime(e1.key))));
-    expenseData = sortedByKeyMap;
-  }
-
-  void deleteData(String id) async {
-    await dbService.deleteData(id);
-    listData();
-    update();
+    data.value = sortedByKeyMap;
   }
 }
