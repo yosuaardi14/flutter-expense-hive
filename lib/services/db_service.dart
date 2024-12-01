@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'package:flutter_expense_app/models/expense.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -5,7 +7,7 @@ import 'package:path/path.dart';
 class DBService {
   // var databasePath = join(await getDatabasesPath(), 'doggie_database.db'),;
   Database? db;
-  final String tableExpense = 'expenseNew';
+  final String tableExpense = 'expense';
   final String columnId = 'id';
   final String columnTitle = 'title';
   final String columnAmount = 'amount';
@@ -29,7 +31,7 @@ class DBService {
   _initDatabase() async {
     var dbPath = await getDatabasesPath();
     String path = join(dbPath, "$tableExpense.db");
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(path, version: 2, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   // SQL code to create the database table
@@ -42,6 +44,14 @@ class DBService {
   $columnType TEXT NOT NULL,
   $columnPayment TEXT NOT NULL,
   $columnDate DATE NOT NULL)''');
+  }
+
+  void _onUpgrade(Database db, int oldVersion, int newVersion) async{
+    if (oldVersion < newVersion) {
+      // you can execute drop table and create table
+      await db.execute("ALTER TABLE $tableExpense ADD COLUMN $columnType TEXT NULL;");
+      await db.execute("ALTER TABLE $tableExpense ADD COLUMN $columnPayment TEXT NULL;");
+    }
   }
 
   Future<List<Expense>> fetchListData() async {
@@ -74,10 +84,10 @@ class DBService {
     await db.insert(tableExpense, expense);
   }
 
-  Future<int> updateData(Map<String, dynamic> expense) async {
+  Future<int> updateData(String id, Map<String, dynamic> expense) async {
     Database db = await instance.database;
     return await db.update(tableExpense, expense,
-        where: '$columnId = ?', whereArgs: [expense["id"]]);
+        where: '$columnId = ?', whereArgs: [id]);
   }
 
   Future<int> deleteData(String id) async {

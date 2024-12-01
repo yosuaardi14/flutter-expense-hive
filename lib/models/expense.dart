@@ -1,7 +1,7 @@
 class Expense {
   String id;
   String title;
-  int amount;
+  double amount;
   String type;
   String payment;
   DateTime date;
@@ -19,7 +19,7 @@ class Expense {
     return Expense(
       id: map["id"],
       title: map["title"],
-      amount: int.parse(map["amount"]),
+      amount: double.parse(map["amount"].toString()),
       type: map["type"],
       payment: map["payment"],
       date: DateTime.parse(map["date"]),
