@@ -19,7 +19,7 @@ class ExpenseAddController extends GetxController {
   final id = "".obs;
 
   Future<void> checkArguments(dynamic args) async {
-    if (args != null) {
+    if (args != null && id.value != args) {
       detailData(args);
     }
   }
