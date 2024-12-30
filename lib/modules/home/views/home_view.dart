@@ -24,7 +24,7 @@ class HomeView extends GetView<HomeController> {
         onPageChanged: controller.onChange,
         // index: controller.currentIndex.value,
         children: const [
-          ExpenseListView(), ExpenseCalendarView(), ExpenseTableView(),
+          ExpenseList(), ExpenseCalendarView(), ExpenseTableView(),
           // GetBuilder<ExpenseListController>(
           //   init: ExpenseListController(),
           //   builder: (controller) => const ExpenseListView(),

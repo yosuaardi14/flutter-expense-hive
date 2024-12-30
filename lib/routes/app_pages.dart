@@ -28,7 +28,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.EXPENSE_LIST,
-      page: () => const ExpenseListView(),
+      page: () => const ExpenseList(),
       binding: ExpenseListBinding(),
     ),
     GetPage(

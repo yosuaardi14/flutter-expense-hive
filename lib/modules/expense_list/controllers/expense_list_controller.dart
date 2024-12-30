@@ -1,7 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_expense_app/modules/base/controllers/base_controller.dart';
 import "package:collection/collection.dart";
 import 'package:intl/intl.dart';
 
@@ -9,74 +9,75 @@ import '../../../models/expense.dart';
 import '../../../services/hive_service.dart';
 // import '../../../services/db_service.dart';
 import '../../../utils/global_functions.dart';
+import '../views/expense_list_view.dart';
 
-class ExpenseListController extends GetxController {
+class ExpenseListState extends BaseController<ExpenseList> {
+  @override
+  Widget build(BuildContext context) => ExpenseListView(this);
+
   HiveService dbService = HiveService.instance;
   // DBService dbService = DBService.instance;
-  bool showChart = true;
-  bool showList = true;
-  bool isLoading = false;
-  bool isFilter = false;
-  final pageIndex = 0.obs;
-  final filterValue = {
+  ValueNotifier<bool> showChart = ValueNotifier(true);
+  ValueNotifier<bool> showList = ValueNotifier(true);
+  ValueNotifier<bool> isFilter = ValueNotifier(false);
+  ValueNotifier<int> pageIndex = ValueNotifier(0);
+  ValueNotifier<Map<String, String>> filterValue = ValueNotifier({
     "type": "Semua",
     "payment": "Semua",
     "month": "0",
     "year": "Semua",
-  }.obs;
-  final listExpense = <Expense>[].obs;
-  final listExpenseFilter = <Expense>[].obs;
-  final expenseData = <String, dynamic>{}.obs;
-  final isExpense = true.obs;
-  final listYear = <String>["Semua"].obs;
+  });
+  ValueNotifier<List<Expense>> listExpense = ValueNotifier(<Expense>[]);
+  ValueNotifier<List<Expense>> listExpenseFilter = ValueNotifier(<Expense>[]);
+  ValueNotifier<Map<String, dynamic>> expenseData = ValueNotifier({});
+  ValueNotifier<bool> isExpense = ValueNotifier(true);
+  ValueNotifier<List<String>> listYear = ValueNotifier(["Semua"]);
 
   @override
-  void onInit() {
-    super.onInit();
-    listYear.addAll(List.generate(
+  void initState() {
+    super.initState();
+    listYear.value.addAll(List.generate(
       DateTime.now().year - 2020 + 1,
       (index) => (2020 + index).toString(),
     ));
-  }
-
-  void changePage(int value) {
-    pageIndex(value);
+    listData();
   }
 
   void switchList() {
-    isExpense.toggle();
-    update();
+    isExpense.value = !isExpense.value;
     listData();
   }
 
   void listData() async {
-    isLoading = true;
-    update();
+    isLoading.value = true;
     listExpense.value = await dbService.fetchListData();
-    listExpense.value = listExpense
+
+    listExpense.value = listExpense.value
         .where((e) =>
             isExpense.value ? e.type != "Pemasukan" : e.type == "Pemasukan")
         .toList();
-    if (isFilter) {
+    if (isFilter.value) {
       _groupByDate(listExpenseFilter, expenseData);
     } else {
       _groupByDate(listExpense, expenseData);
     }
-    isLoading = false;
-    update();
+    isLoading.value = false;
   }
 
   void filterData(Map<String, String> data) {
-    filterValue(data);
+    setState(() {
+      filterValue.value = data;
+    });
+
     if (data["type"] == "Semua" &&
         data["payment"] == "Semua" &&
         data["year"] == "Semua" &&
         data["month"] == "0") {
-      isFilter = false;
+      isFilter.value = false;
       listData();
       return;
     }
-    List<Expense> temp = listExpense;
+    List<Expense> temp = listExpense.value;
     if (data["month"] != "0") {
       temp = temp
           .where((element) =>
@@ -96,7 +97,7 @@ class ExpenseListController extends GetxController {
       temp =
           temp.where((element) => element.payment == data["payment"]).toList();
     }
-    isFilter = true;
+    isFilter.value = true;
     listExpenseFilter.value = temp;
     listData();
   }
@@ -104,33 +105,13 @@ class ExpenseListController extends GetxController {
   void deleteData(String id) async {
     await dbService.deleteData(id);
     listData();
-    update();
   }
 
   List<Expense> get _weekExpenses {
     DateTime now = DateUtils.dateOnly(DateTime.now());
     DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
-    return listExpense.where((tx) {
-      // String date = DateTime.now().toString();
-      // String firstDay = '${date.substring(0, 8)}01${date.substring(10)}';
-
-      // int weekDay = DateTime.parse(firstDay).weekday;
-
-      // int selisih = (7 - weekDay) + 1;
-
-      // DateTime todayDate = DateTime.now();
-
-      // weekDay--;
-      // int weekOfMonth = ((todayDate.day + weekDay) / 7).ceil();
-      // int firstMondayWeek =
-      //     (weekOfMonth - 1) * (selisih + 1) + (weekOfMonth - 2);
-      // return tx.date.isAfter(
-      //       DateTime.now().subtract(
-      //         Duration(days: todayDate.day - firstMondayWeek + 1),
-      //       ),
-      //     ) &&
-      //     tx.date.month == DateTime.now().month;
+    return listExpense.value.where((tx) {
       return tx.date.isAfter(startOfWeek) &&
           tx.date.isBefore(endOfWeek) &&
           tx.date.month == now.month;
@@ -139,21 +120,22 @@ class ExpenseListController extends GetxController {
 
   Map<String, dynamic> totalSpending() {
     final DateTime now = DateTime.now();
-    List<Expense> yearExpense =
-        listExpense.where((element) => element.date.year == now.year).toList();
+    List<Expense> yearExpense = listExpense.value
+        .where((element) => element.date.year == now.year)
+        .toList();
 
-    List<Expense> lastMonthExpense = listExpense
+    List<Expense> lastMonthExpense = listExpense.value
         .where((element) =>
             element.date.month == now.month - 1 &&
             element.date.year == now.year)
         .toList();
 
-    List<Expense> monthExpense = listExpense
+    List<Expense> monthExpense = listExpense.value
         .where((element) =>
             element.date.month == now.month && element.date.year == now.year)
         .toList();
 
-    List<Expense> todayExpense = listExpense
+    List<Expense> todayExpense = listExpense.value
         .where((element) =>
             element.date.day == now.day &&
             element.date.month == now.month &&
@@ -173,10 +155,10 @@ class ExpenseListController extends GetxController {
     return data.fold(0.0, (sum, item) => sum + item.amount);
   }
 
-  void _groupByDate(RxList<Expense> list, RxMap<String, dynamic> data) {
-    Map<String, dynamic> newMap = groupBy(
-            list, (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date))
-        .map((k, v) {
+  void _groupByDate(ValueNotifier<List<Expense>> list,
+      ValueNotifier<Map<String, dynamic>> data) {
+    Map<String, dynamic> newMap = groupBy(list.value,
+        (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date)).map((k, v) {
       return MapEntry(
         k,
         v.map(
