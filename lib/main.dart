@@ -10,14 +10,15 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter',
+      title: 'Expense App',
       theme: ThemeData(
+        useMaterial3: false,
         primarySwatch: Colors.purple,
       ),
       initialRoute: AppPages.INITIAL,

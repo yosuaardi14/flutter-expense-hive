@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'dart:convert';
 
 import 'package:flutter_expense_app/models/expense.dart';
@@ -31,9 +33,9 @@ class HiveService {
 
   Future<Expense?> fetchData(String id) async {
     Box db = await instance.database;
-    Map<String, dynamic>? maps = db.get(id);
+    Map<dynamic, dynamic>? maps = db.get(id);
     if (maps != null) {
-      return Expense.fromMap(maps);
+      return Expense.fromMap(Map<String, dynamic>.from(maps));
     }
     return null;
   }
@@ -43,9 +45,9 @@ class HiveService {
     return await db.put(expense["id"], expense);
   }
 
-  Future<void> updateData(Map<String, dynamic> expense) async {
+  Future<void> updateData(String id, Map<String, dynamic> expense) async {
     Box db = await instance.database;
-    return await db.put(expense["id"], expense);
+    return await db.put(id, expense);
   }
 
   Future<void> deleteData(String id) async {
