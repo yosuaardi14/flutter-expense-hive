@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expense_app/utils/constant.dart';
 import 'package:get/get.dart';
 
 import '../../../models/expense.dart';
@@ -94,6 +95,11 @@ class ExpenseAddController extends GetxController {
     selectedDate = DateTime.now();
     id("");
     this.isExpense(isExpense);
+    if(isExpense){
+      typeValue.value = Constant.dropdownType[1];
+    }else{
+      typeValue.value = "Pemasukan";
+    }
     update();
   }
 }
