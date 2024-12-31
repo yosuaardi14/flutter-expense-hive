@@ -163,11 +163,6 @@ class ExpenseListView extends GetView<ExpenseListController> {
 
   @override
   Widget build(BuildContext context) {
-    Widget fab = FloatingActionButton(
-      onPressed: addExpense,
-      child: const Icon(Icons.add),
-    );
-
     // Widget filterButton = SizedBox(
     //   height: 40,
     //   child: ElevatedButton(
@@ -481,7 +476,10 @@ class ExpenseListView extends GetView<ExpenseListController> {
         ],
       ),
       // drawer: const BaseDrawer(),
-      floatingActionButton: fab,
+      floatingActionButton: FloatingActionButton(
+        onPressed: addExpense,
+        child: const Icon(Icons.add),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       // bottomNavigationBar: bottomNavigationBar,
       // body: body,
@@ -503,50 +501,54 @@ class ExpenseListView extends GetView<ExpenseListController> {
 
   List<Widget> filter() {
     return [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
-        child: Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: controller.filterValue["type"],
-                items: [
-                  ...Constant.dropdownType.map(
-                    (e) => DropdownMenuItem<String>(
-                      value: e,
-                      child: Text(e),
-                    ),
-                  )
-                ],
-                decoration: const InputDecoration(labelText: 'Tipe'),
-                onChanged: (val) {
-                  controller.filterValue["type"] = val!;
-                  controller.update();
-                },
+      if (controller.isExpense.value)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: controller.filterValue["type"],
+                  items: [
+                    ...Constant.dropdownType.map(
+                      (e) => DropdownMenuItem<String>(
+                        value: e,
+                        child: Text(e),
+                      ),
+                    )
+                  ],
+                  decoration: const InputDecoration(labelText: 'Tipe'),
+                  onChanged: (val) {
+                    controller.filterValue["type"] = val!;
+                    controller.update();
+                    controller.filterData(controller.filterValue());
+                  },
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: controller.filterValue["payment"],
-                items: [
-                  ...Constant.dropdownPayment.map(
-                    (e) => DropdownMenuItem<String>(
-                      value: e,
-                      child: Text(e),
-                    ),
-                  )
-                ],
-                decoration: const InputDecoration(labelText: 'Pembayaran'),
-                onChanged: (val) {
-                  controller.filterValue["payment"] = val!;
-                  controller.update();
-                },
+              const SizedBox(width: 10),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: controller.filterValue["payment"],
+                  items: [
+                    ...Constant.dropdownPayment.map(
+                      (e) => DropdownMenuItem<String>(
+                        value: e,
+                        child: Text(e),
+                      ),
+                    )
+                  ],
+                  decoration: const InputDecoration(labelText: 'Pembayaran'),
+                  onChanged: (val) {
+                    controller.filterValue["payment"] = val!;
+                    controller.update();
+                    controller.filterData(controller.filterValue());
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5),
         child: Row(
@@ -566,6 +568,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
                 onChanged: (val) {
                   controller.filterValue["month"] = val!;
                   controller.update();
+                  controller.filterData(controller.filterValue());
                 },
               ),
             ),
@@ -585,6 +588,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
                 onChanged: (val) {
                   controller.filterValue["year"] = val!;
                   controller.update();
+                  controller.filterData(controller.filterValue());
                 },
               ),
             ),
@@ -592,12 +596,12 @@ class ExpenseListView extends GetView<ExpenseListController> {
         ),
       ),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
         child: Row(
           children: [
             Expanded(
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                // style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 onPressed: () {
                   controller.filterData({
                     "type": "Semua",
@@ -606,21 +610,42 @@ class ExpenseListView extends GetView<ExpenseListController> {
                     "year": "Semua",
                   });
                 },
-                child: const Text("Hapus"),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  controller.filterData(controller.filterValue());
-                },
-                child: const Text("Filter"),
+                child: const Text("Reset"),
               ),
             ),
           ],
         ),
       ),
+      // Padding(
+      //   padding: const EdgeInsets.symmetric(horizontal: 5),
+      //   child: Row(
+      //     children: [
+      //       Expanded(
+      //         child: ElevatedButton(
+      //           style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+      //           onPressed: () {
+      //             controller.filterData({
+      //               "type": "Semua",
+      //               "payment": "Semua",
+      //               "month": "0",
+      //               "year": "Semua",
+      //             });
+      //           },
+      //           child: const Text("Hapus"),
+      //         ),
+      //       ),
+      //       const SizedBox(width: 10),
+      //       Expanded(
+      //         child: ElevatedButton(
+      //           onPressed: () {
+      //             controller.filterData(controller.filterValue());
+      //           },
+      //           child: const Text("Filter"),
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      // ),
     ];
   }
 }

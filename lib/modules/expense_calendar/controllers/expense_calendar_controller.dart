@@ -20,6 +20,7 @@ class ExpenseCalendarController extends GetxController {
   final payment = Constant.dropdownPayment[0].obs;
   final startWeekDay = 0.obs;
   final sisaWeekDay = 0.obs;
+  final mode = "Outcome".obs;
   final month = "0".obs;
   final year = "2024".obs;
   final listYear = <String>[].obs;
@@ -80,8 +81,13 @@ class ExpenseCalendarController extends GetxController {
     isLoading = true;
     update();
     listExpense.value = await dbService.fetchListData();
-    listExpense.value =
-        listExpense.where((e) => e.type != "Pemasukan").toList();
+    if (mode.value == "Income") {
+      listExpense.value =
+          listExpense.where((e) => e.type == "Pemasukan").toList();
+    } else {
+      listExpense.value =
+          listExpense.where((e) => e.type != "Pemasukan").toList();
+    }
     calculateDayInMonth();
     _groupByDate(listExpense, expenseData);
     isLoading = false;

@@ -46,10 +46,18 @@ class ExpenseListController extends GetxController {
   void switchList() {
     isExpense.toggle();
     update();
+    isFilter = false;
+    filterValue({
+      "type": "Semua",
+      "payment": "Semua",
+      "month": "0",
+      "year": "Semua",
+    });
     listData();
   }
 
   void listData() async {
+    print("listData");
     isLoading = true;
     update();
     listExpense.value = await dbService.fetchListData();
@@ -67,6 +75,10 @@ class ExpenseListController extends GetxController {
   }
 
   void filterData(Map<String, String> data) {
+    if (!isExpense.value) {
+      data["type"] = "Semua";
+      data["payment"] = "Semua";
+    }
     filterValue(data);
     if (data["type"] == "Semua" &&
         data["payment"] == "Semua" &&

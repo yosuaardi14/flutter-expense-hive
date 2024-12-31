@@ -24,7 +24,7 @@ class ExpenseAddController extends GetxController {
     }
   }
 
-  void insertData() async {
+  Future<void> insertData() async {
     if (id.value != "") {
       Map<String, dynamic> data = {
         "title": titleController.text,

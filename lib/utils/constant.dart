@@ -45,4 +45,9 @@ class Constant {
     "Bank",
     "Lainnya",
   ];
+
+  static const List<String> mode = [
+    "Outcome",
+    "Income",
+  ];
 }

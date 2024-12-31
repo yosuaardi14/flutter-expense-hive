@@ -28,8 +28,7 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
 
     bool add = await GF.showConfirmationAddDialog();
     if (add) {
-      controller.insertData();
-      Navigator.of(context).pop();
+      controller.insertData().whenComplete(() => Navigator.of(context).pop());
     }
   }
 

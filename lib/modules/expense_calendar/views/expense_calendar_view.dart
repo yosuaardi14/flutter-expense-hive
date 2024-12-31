@@ -75,6 +75,23 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                       //     ),
                       //   ],
                       // ),
+                      DropdownButtonFormField<String>(
+                        value: controller.mode.value,
+                        items: [
+                          ...Constant.mode.map(
+                            (e) => DropdownMenuItem<String>(
+                              value: e,
+                              child: Text(e),
+                            ),
+                          )
+                        ],
+                        decoration: const InputDecoration(labelText: 'Tipe'),
+                        onChanged: (val) {
+                          controller.mode.value = val!;
+                          controller.update();
+                          controller.listData();
+                        },
+                      ),
                       Row(
                         children: [
                           Expanded(
