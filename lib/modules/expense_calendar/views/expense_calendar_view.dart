@@ -26,7 +26,7 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(5),
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
