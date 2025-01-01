@@ -4,14 +4,14 @@ import "package:collection/collection.dart";
 import 'package:intl/intl.dart';
 
 import '../../../models/expense.dart';
-import '../../../services/hive_service.dart';
-// import '../../../services/db_service.dart';
+// import '../../../services/hive_service.dart';
+import '../../../services/db_service.dart';
 import '../../../utils/constant.dart';
 import '../../../utils/global_functions.dart';
 
 class ExpenseCalendarController extends GetxController {
-  HiveService dbService = HiveService.instance;
-  // DBService dbService = DBService.instance;
+  // HiveService dbService = HiveService.instance;
+  DBService dbService = DBService.instance;
   bool isLoading = false;
   final listExpense = <Expense>[].obs;
   final expenseData = <String, dynamic>{}.obs;
@@ -106,8 +106,8 @@ class ExpenseCalendarController extends GetxController {
   }
 
   double totalSpend(int day) {
-    String dayStr = day < 10 ? "0$day" : "$day";
-    List<Expense>? data = expenseData["$dayStr-${month.value}-${year.value}"];
+    String dayStr = day.toString().padLeft(2, '0');
+    List<Expense>? data = expenseData["$dayStr-${month.value.padLeft(2, '0')}-${year.value}"];
     return calcTotalSpending(data);
     // if (data == null) return 0;
     // return data.fold(0.0, (sum, item) => sum + item.amount);

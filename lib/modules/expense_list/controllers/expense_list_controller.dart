@@ -6,13 +6,13 @@ import "package:collection/collection.dart";
 import 'package:intl/intl.dart';
 
 import '../../../models/expense.dart';
-import '../../../services/hive_service.dart';
-// import '../../../services/db_service.dart';
+// import '../../../services/hive_service.dart';
+import '../../../services/db_service.dart';
 import '../../../utils/global_functions.dart';
 
 class ExpenseListController extends GetxController {
-  HiveService dbService = HiveService.instance;
-  // DBService dbService = DBService.instance;
+  // HiveService dbService = HiveService.instance;
+  DBService dbService = DBService.instance;
   bool showChart = true;
   bool showList = true;
   bool isLoading = false;

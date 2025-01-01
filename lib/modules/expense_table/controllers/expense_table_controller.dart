@@ -4,14 +4,14 @@ import "package:collection/collection.dart";
 
 import 'package:intl/intl.dart';
 import '../../../models/expense.dart';
-import '../../../services/hive_service.dart';
-// import '../../../services/db_service.dart';
+// import '../../../services/hive_service.dart';
+import '../../../services/db_service.dart';
 import '../../../utils/constant.dart';
 import '../../../utils/global_functions.dart';
 
 class ExpenseTableController extends GetxController {
-  HiveService dbService = HiveService.instance;
-  // DBService dbService = DBService.instance;
+  // HiveService dbService = HiveService.instance;
+  DBService dbService = DBService.instance;
   bool isLoading = false;
   final listExpense = <Expense>[].obs;
   final expenseData = <String, dynamic>{}.obs;
@@ -95,7 +95,7 @@ class ExpenseTableController extends GetxController {
       double totalSisaPerDay = 0.0;
 
       var splitDate = item.key.split("-");
-      if (splitDate[1] != month.value || splitDate[2] != year.value) {
+      if (splitDate[1] != month.value.padLeft(2, '0') || splitDate[2] != year.value) {
         continue;
       }
       List<Expense> listExpense = item.value;

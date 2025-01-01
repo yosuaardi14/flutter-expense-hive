@@ -3,12 +3,12 @@ import 'package:flutter_expense_app/utils/constant.dart';
 import 'package:get/get.dart';
 
 import '../../../models/expense.dart';
-import '../../../services/hive_service.dart';
-// import '../../../services/db_service.dart';
+// import '../../../services/hive_service.dart';
+import '../../../services/db_service.dart';
 
 class ExpenseAddController extends GetxController {
-  HiveService dbService = HiveService.instance;
-  // DBService dbService = DBService.instance;
+  // HiveService dbService = HiveService.instance;
+  DBService dbService = DBService.instance;
 
   TextEditingController titleController = TextEditingController();
   TextEditingController amountController = TextEditingController();
