@@ -49,7 +49,7 @@ class DBService {
   void _onUpgrade(Database db, int oldVersion, int newVersion) async{
     if (oldVersion < newVersion) {
       // you can execute drop table and create table
-      await db.execute("ALTER TABLE $tableExpense ADD COLUMN $columnType TEXT NULL;");
+      // await db.execute("ALTER TABLE $tableExpense ADD COLUMN $columnType TEXT NULL;");
       await db.execute("ALTER TABLE $tableExpense ADD COLUMN $columnPayment TEXT NULL;");
     }
   }

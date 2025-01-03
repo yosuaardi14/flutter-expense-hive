@@ -269,6 +269,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
             children: controller
                 .totalSpending()
                 .entries
+                .where((x) => x.key != "List")
                 .map(
                   (e) => Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -595,6 +596,25 @@ class ExpenseListView extends GetView<ExpenseListController> {
           ],
         ),
       ),
+      Card(
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Total : ",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                GF.rupiahFormat(controller.totalSpending()["List"],
+                    symbol: "Rp"),
+              ),
+            ],
+          ),
+        ),
+      ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
         child: Row(
@@ -606,8 +626,8 @@ class ExpenseListView extends GetView<ExpenseListController> {
                   controller.filterData({
                     "type": "Semua",
                     "payment": "Semua",
-                    "month": "0",
-                    "year": "Semua",
+                    "month": DateTime.now().month.toString(),
+                    "year": DateTime.now().year.toString(),
                   });
                 },
                 child: const Text("Reset"),

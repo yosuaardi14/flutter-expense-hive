@@ -75,22 +75,52 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                       //     ),
                       //   ],
                       // ),
-                      DropdownButtonFormField<String>(
-                        value: controller.mode.value,
-                        items: [
-                          ...Constant.mode.map(
-                            (e) => DropdownMenuItem<String>(
-                              value: e,
-                              child: Text(e),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: controller.mode.value,
+                              items: [
+                                ...Constant.mode.map(
+                                  (e) => DropdownMenuItem<String>(
+                                    value: e,
+                                    child: Text(e),
+                                  ),
+                                )
+                              ],
+                              decoration:
+                                  const InputDecoration(labelText: 'Jenis'),
+                              onChanged: (val) {
+                                controller.mode.value = val!;
+                                controller.update();
+                                controller.listData();
+                              },
                             ),
-                          )
+                          ),
+                          if (controller.mode.value == "Outcome") ...[
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: controller.type.value,
+                                items: [
+                                  ...Constant.dropdownType.map(
+                                    (e) => DropdownMenuItem<String>(
+                                      value: e,
+                                      child: Text(e),
+                                    ),
+                                  )
+                                ],
+                                decoration:
+                                    const InputDecoration(labelText: 'Tipe'),
+                                onChanged: (val) {
+                                  controller.type.value = val!;
+                                  controller.update();
+                                  controller.listData();
+                                },
+                              ),
+                            ),
+                          ],
                         ],
-                        decoration: const InputDecoration(labelText: 'Tipe'),
-                        onChanged: (val) {
-                          controller.mode.value = val!;
-                          controller.update();
-                          controller.listData();
-                        },
                       ),
                       Row(
                         children: [
@@ -234,28 +264,37 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                         ...List.generate(
                           controller.daysInMonth.value,
                           (index) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    strokeAlign: BorderSide.strokeAlignOutside),
-                                color: Colors.white,
-                              ),
-                              padding: const EdgeInsets.all(10),
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "${(index + 1)}",
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    controller.rupiahFormat(
-                                        controller.totalSpend(index + 1)),
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
+                            double totalSpend =
+                                controller.totalSpend(index + 1);
+                            return InkWell(
+                              onTap: totalSpend == 0
+                                  ? null
+                                  : () {
+                                      controller.showDetail(index + 1);
+                                    },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      strokeAlign:
+                                          BorderSide.strokeAlignOutside),
+                                  color: Colors.white,
+                                ),
+                                padding: const EdgeInsets.all(10),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "${(index + 1)}",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      controller.rupiahFormat(totalSpend),
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },

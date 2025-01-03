@@ -1,20 +1,15 @@
+import 'package:flutter_expense_app/modules/base/controllers/expense_base_controller.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
 import "package:collection/collection.dart";
 
 import 'package:intl/intl.dart';
 import '../../../models/expense.dart';
-// import '../../../services/hive_service.dart';
-import '../../../services/db_service.dart';
 import '../../../utils/constant.dart';
 import '../../../utils/global_functions.dart';
 
-class ExpenseTableController extends GetxController {
-  // HiveService dbService = HiveService.instance;
-  DBService dbService = DBService.instance;
+class ExpenseTableController extends ExpenseBaseController {
   bool isLoading = false;
-  final listExpense = <Expense>[].obs;
-  final expenseData = <String, dynamic>{}.obs;
   final daysInMonth = 28.obs;
   final type = Constant.dropdownType[1].obs;
   final payment = Constant.dropdownPayment[0].obs;
@@ -95,7 +90,8 @@ class ExpenseTableController extends GetxController {
       double totalSisaPerDay = 0.0;
 
       var splitDate = item.key.split("-");
-      if (splitDate[1] != month.value.padLeft(2, '0') || splitDate[2] != year.value) {
+      if (splitDate[1] != month.value.padLeft(2, '0') ||
+          splitDate[2] != year.value) {
         continue;
       }
       List<Expense> listExpense = item.value;
