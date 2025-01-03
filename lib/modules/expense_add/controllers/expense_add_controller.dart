@@ -3,13 +3,9 @@ import 'package:flutter_expense_app/utils/constant.dart';
 import 'package:get/get.dart';
 
 import '../../../models/expense.dart';
-import '../../../services/hive_service.dart';
-// import '../../../services/db_service.dart';
+import '../../base/controllers/expense_base_controller.dart';
 
-class ExpenseAddController extends GetxController {
-  HiveService dbService = HiveService.instance;
-  // DBService dbService = DBService.instance;
-
+class ExpenseAddController extends ExpenseBaseController {
   TextEditingController titleController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   Rx<String> typeValue = "Makan".obs;
@@ -95,9 +91,9 @@ class ExpenseAddController extends GetxController {
     selectedDate = DateTime.now();
     id("");
     this.isExpense(isExpense);
-    if(isExpense){
+    if (isExpense) {
       typeValue.value = Constant.dropdownType[1];
-    }else{
+    } else {
       typeValue.value = "Pemasukan";
     }
     update();

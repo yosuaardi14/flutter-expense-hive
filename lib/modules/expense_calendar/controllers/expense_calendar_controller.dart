@@ -1,22 +1,18 @@
+import 'package:flutter_expense_app/modules/expense_detail/views/expense_detail_view.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
 import "package:collection/collection.dart";
 import 'package:intl/intl.dart';
 
 import '../../../models/expense.dart';
-import '../../../services/hive_service.dart';
-// import '../../../services/db_service.dart';
 import '../../../utils/constant.dart';
 import '../../../utils/global_functions.dart';
+import '../../base/controllers/expense_base_controller.dart';
 
-class ExpenseCalendarController extends GetxController {
-  HiveService dbService = HiveService.instance;
-  // DBService dbService = DBService.instance;
+class ExpenseCalendarController extends ExpenseBaseController {
   bool isLoading = false;
-  final listExpense = <Expense>[].obs;
-  final expenseData = <String, dynamic>{}.obs;
   final daysInMonth = 28.obs;
-  final type = Constant.dropdownType[1].obs;
+  final type = Constant.dropdownType[0].obs;
   final payment = Constant.dropdownPayment[0].obs;
   final startWeekDay = 0.obs;
   final sisaWeekDay = 0.obs;
@@ -85,9 +81,15 @@ class ExpenseCalendarController extends GetxController {
       listExpense.value =
           listExpense.where((e) => e.type == "Pemasukan").toList();
     } else {
-      listExpense.value =
-          listExpense.where((e) => e.type != "Pemasukan").toList();
+      if (type.value != Constant.dropdownType[0]) {
+        listExpense.value =
+            listExpense.where((e) => e.type == type.value).toList();
+      } else {
+        listExpense.value =
+            listExpense.where((e) => e.type != "Pemasukan").toList();
+      }
     }
+
     calculateDayInMonth();
     _groupByDate(listExpense, expenseData);
     isLoading = false;
@@ -106,8 +108,9 @@ class ExpenseCalendarController extends GetxController {
   }
 
   double totalSpend(int day) {
-    String dayStr = day < 10 ? "0$day" : "$day";
-    List<Expense>? data = expenseData["$dayStr-${month.value}-${year.value}"];
+    String dayStr = day.toString().padLeft(2, '0');
+    List<Expense>? data =
+        expenseData["$dayStr-${month.value.padLeft(2, '0')}-${year.value}"];
     return calcTotalSpending(data);
     // if (data == null) return 0;
     // return data.fold(0.0, (sum, item) => sum + item.amount);
@@ -160,5 +163,12 @@ class ExpenseCalendarController extends GetxController {
   double calcTotalSpending(List<Expense>? data) {
     if (data == null) return 0;
     return data.fold(0.0, (sum, item) => sum + item.amount);
+  }
+
+  void showDetail(int day) {
+    String dayStr = day.toString().padLeft(2, '0');
+    List<Expense>? data =
+        expenseData["$dayStr-${month.value.padLeft(2, '0')}-${year.value}"];
+    Get.bottomSheet(ExpenseDetailView(data: data));
   }
 }

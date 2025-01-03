@@ -24,7 +24,9 @@ class HomeView extends GetView<HomeController> {
         onPageChanged: controller.onChange,
         // index: controller.currentIndex.value,
         children: const [
-          ExpenseListView(), ExpenseCalendarView(), ExpenseTableView(),
+          ExpenseTableView(),
+          ExpenseCalendarView(),
+          ExpenseListView(),
           // GetBuilder<ExpenseListController>(
           //   init: ExpenseListController(),
           //   builder: (controller) => const ExpenseListView(),
@@ -68,16 +70,16 @@ class HomeView extends GetView<HomeController> {
           onTap: controller.onChange,
           items: const [
             BottomNavigationBarItem(
-              label: "List",
-              icon: Icon(Icons.list_alt),
+              label: "Table",
+              icon: Icon(Icons.table_view_outlined),
             ),
             BottomNavigationBarItem(
               label: "Calendar",
               icon: Icon(Icons.calendar_month),
             ),
             BottomNavigationBarItem(
-              label: "Table",
-              icon: Icon(Icons.table_view_outlined),
+              label: "List",
+              icon: Icon(Icons.list_alt),
             ),
           ],
         ),

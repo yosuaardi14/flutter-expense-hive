@@ -6,6 +6,8 @@ import '../modules/expense_add/bindings/expense_add_binding.dart';
 import '../modules/expense_add/views/expense_add_view.dart';
 import '../modules/expense_calendar/bindings/expense_calendar_binding.dart';
 import '../modules/expense_calendar/views/expense_calendar_view.dart';
+import '../modules/expense_detail/bindings/expense_detail_binding.dart';
+import '../modules/expense_detail/views/expense_detail_view.dart';
 import '../modules/expense_list/bindings/expense_list_binding.dart';
 import '../modules/expense_list/views/expense_list_view.dart';
 import '../modules/expense_table/bindings/expense_table_binding.dart';
@@ -35,6 +37,11 @@ class AppPages {
       name: _Paths.EXPENSE_ADD,
       page: () => const ExpenseAddView(),
       binding: ExpenseAddBinding(),
+    ),
+    GetPage(
+      name: _Paths.EXPENSE_DETAIL,
+      page: () => const ExpenseDetailView(),
+      binding: ExpenseDetailBinding(),
     ),
     GetPage(
       name: _Paths.EXPENSE_CALENDAR,
