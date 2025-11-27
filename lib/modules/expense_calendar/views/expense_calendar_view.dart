@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:get/get.dart';
@@ -26,7 +28,10 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 5,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -79,17 +84,18 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: controller.mode.value,
+                              initialValue: controller.mode.value,
                               items: [
                                 ...Constant.mode.map(
                                   (e) => DropdownMenuItem<String>(
                                     value: e,
                                     child: Text(e),
                                   ),
-                                )
+                                ),
                               ],
-                              decoration:
-                                  const InputDecoration(labelText: 'Jenis'),
+                              decoration: const InputDecoration(
+                                labelText: 'Jenis',
+                              ),
                               onChanged: (val) {
                                 controller.mode.value = val!;
                                 controller.update();
@@ -101,17 +107,18 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: DropdownButtonFormField<String>(
-                                value: controller.type.value,
+                                initialValue: controller.type.value,
                                 items: [
                                   ...Constant.dropdownType.map(
                                     (e) => DropdownMenuItem<String>(
                                       value: e,
                                       child: Text(e),
                                     ),
-                                  )
+                                  ),
                                 ],
-                                decoration:
-                                    const InputDecoration(labelText: 'Tipe'),
+                                decoration: const InputDecoration(
+                                  labelText: 'Tipe',
+                                ),
                                 onChanged: (val) {
                                   controller.type.value = val!;
                                   controller.update();
@@ -119,6 +126,29 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                                 },
                               ),
                             ),
+                          ] else ...[
+                            // const SizedBox(width: 10),
+                            // Expanded(
+                            //   child: DropdownButtonFormField<String>(
+                            //     value: controller.payment.value,
+                            //     items: [
+                            //       ...Constant.dropdownPayment.map(
+                            //         (e) => DropdownMenuItem<String>(
+                            //           value: e,
+                            //           child: Text(e),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //     decoration: const InputDecoration(
+                            //       labelText: 'Sumber',
+                            //     ),
+                            //     onChanged: (val) {
+                            //       controller.payment.value = val!;
+                            //       controller.update();
+                            //       controller.listData();
+                            //     },
+                            //   ),
+                            // ),
                           ],
                         ],
                       ),
@@ -126,19 +156,20 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: controller.month.value,
+                              initialValue: controller.year.value,
                               items: [
-                                ...Constant.dropdownMonthOnly.entries.map(
+                                ...controller.listYear.map(
                                   (e) => DropdownMenuItem<String>(
-                                    value: e.key,
-                                    child: Text(e.value),
+                                    value: e,
+                                    child: Text(e),
                                   ),
-                                )
+                                ),
                               ],
-                              decoration:
-                                  const InputDecoration(labelText: 'Bulan'),
+                              decoration: const InputDecoration(
+                                labelText: 'Tahun',
+                              ),
                               onChanged: (val) {
-                                controller.month.value = val!;
+                                controller.year.value = val!;
                                 controller.calculateDayInMonth();
                                 controller.update();
                               },
@@ -147,19 +178,20 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: controller.year.value,
+                              initialValue: controller.month.value,
                               items: [
-                                ...controller.listYear.map(
+                                ...Constant.dropdownMonthOnly.entries.map(
                                   (e) => DropdownMenuItem<String>(
-                                    value: e,
-                                    child: Text(e),
+                                    value: e.key,
+                                    child: Text(e.value),
                                   ),
-                                )
+                                ),
                               ],
-                              decoration:
-                                  const InputDecoration(labelText: 'Tahun'),
+                              decoration: const InputDecoration(
+                                labelText: 'Bulan',
+                              ),
                               onChanged: (val) {
-                                controller.year.value = val!;
+                                controller.month.value = val!;
                                 controller.calculateDayInMonth();
                                 controller.update();
                               },
@@ -170,11 +202,54 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                     ],
                   ),
                 ),
+                Builder(
+                  builder: (context) {
+                    final mediaQuery = MediaQuery.sizeOf(context);
+                    final paymentList = Constant.dropdownPayment.sublist(1);
+                    return Obx(
+                      () => Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        spacing: 5,
+                        children: paymentList
+                            .map(
+                              (e) => ChoiceChip(
+                                selectedColor: Colors.purple,
+                                label: SizedBox(
+                                  width:
+                                      mediaQuery.width / paymentList.length -
+                                      paymentList.length * 5,
+                                  child: Text(
+                                    e,
+                                    style: const TextStyle(color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                selected: controller.selectedPayment.contains(
+                                  e,
+                                ),
+                                onSelected: (value) {
+                                  if (value) {
+                                    controller.selectedPayment.add(e);
+                                  } else {
+                                    controller.selectedPayment.remove(e);
+                                  }
+                                  controller.update();
+                                  controller.listData();
+                                },
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    );
+                  },
+                ),
                 Card(
                   elevation: 3,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -184,8 +259,9 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                         ),
                         Text(
                           GF.rupiahFormat(
-                              controller.totalSpending()["Bulan ini"],
-                              symbol: "Rp"),
+                            controller.totalSpending()["Bulan ini"],
+                            symbol: "Rp",
+                          ),
                         ),
                       ],
                     ),
@@ -230,7 +306,8 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(
-                                  strokeAlign: BorderSide.strokeAlignOutside),
+                                strokeAlign: BorderSide.strokeAlignOutside,
+                              ),
                               color: Colors.purple,
                             ),
                             child: Text(
@@ -245,27 +322,34 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                   ),
                 ),
                 Expanded(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                    child: GridView.count(
-                      crossAxisCount: 7,
-                      children: [
-                        ...List.generate(
-                          controller.startWeekDay.value,
-                          (index) => Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  strokeAlign: BorderSide.strokeAlignOutside),
-                              color: Colors.white,
+                  child: Builder(
+                    builder: (context) {
+                      final size = MediaQuery.sizeOf(context);
+                      return GridView.extent(
+                        maxCrossAxisExtent: size.width / 7,
+                        childAspectRatio: (size.width / 7) / min(size.width / 7, 75),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 1,
+                        ),
+                        children: [
+                          ...List.generate(
+                            controller.startWeekDay.value,
+                            (index) => Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  strokeAlign: BorderSide.strokeAlignOutside,
+                                ),
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                        ...List.generate(
-                          controller.daysInMonth.value,
-                          (index) {
-                            double totalSpend =
-                                controller.totalSpend(index + 1);
+                          ...List.generate(controller.daysInMonth.value, (
+                            index,
+                          ) {
+                            double totalSpend = controller.totalSpend(
+                              index + 1,
+                            );
                             return InkWell(
                               onTap: totalSpend == 0
                                   ? null
@@ -275,8 +359,8 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                               child: Container(
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                      strokeAlign:
-                                          BorderSide.strokeAlignOutside),
+                                    strokeAlign: BorderSide.strokeAlignOutside,
+                                  ),
                                   color: Colors.white,
                                 ),
                                 padding: const EdgeInsets.all(10),
@@ -287,7 +371,8 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                                     Text(
                                       "${(index + 1)}",
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                     Text(
                                       controller.rupiahFormat(totalSpend),
@@ -297,21 +382,22 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                                 ),
                               ),
                             );
-                          },
-                        ),
-                        if (controller.sisaWeekDay.value != 0)
-                          ...List.generate(
-                            7 - controller.sisaWeekDay.value,
-                            (index) => Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    strokeAlign: BorderSide.strokeAlignOutside),
-                                color: Colors.white,
+                          }),
+                          if (controller.sisaWeekDay.value != 0)
+                            ...List.generate(
+                              7 - controller.sisaWeekDay.value,
+                              (index) => Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    strokeAlign: BorderSide.strokeAlignOutside,
+                                  ),
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ],

@@ -64,14 +64,14 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                     ? [
                         switchButton(),
                         DropdownButtonFormField<String>(
-                          value: "Pemasukan",
+                          initialValue: "Pemasukan",
                           items: [
                             ...["Pemasukan"].map(
                               (e) => DropdownMenuItem<String>(
                                 value: e,
                                 child: Text(e),
                               ),
-                            )
+                            ),
                           ],
                           decoration: const InputDecoration(labelText: 'Tipe'),
                           onChanged: (val) {
@@ -88,26 +88,29 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                         ),
                         TextField(
                           inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
+                            FilteringTextInputFormatter.digitsOnly,
                           ],
-                          decoration:
-                              const InputDecoration(labelText: 'Jumlah'),
+                          decoration: const InputDecoration(
+                            labelText: 'Jumlah',
+                          ),
                           controller: controller.amountController,
                           keyboardType: TextInputType.number,
                         ),
                         DropdownButtonFormField<String>(
-                          value: controller.incomeFromValue.value,
+                          initialValue: controller.incomeFromValue.value,
                           items: [
-                            ...[...List<String>.from(Constant.dropdownPayment)]
-                                .map(
+                            ...[
+                              ...List<String>.from(Constant.dropdownPayment),
+                            ].map(
                               (e) => DropdownMenuItem<String>(
                                 value: e,
                                 child: Text(e),
                               ),
-                            )
+                            ),
                           ],
-                          decoration:
-                              const InputDecoration(labelText: 'Sumber'),
+                          decoration: const InputDecoration(
+                            labelText: 'Sumber',
+                          ),
                           onChanged: (val) {
                             controller.incomeFromValue.value = val!;
                             controller.update();
@@ -125,9 +128,7 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                               TextButton(
                                 child: const Text(
                                   'Pilih Tanggal',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 onPressed: () {
                                   _presentDatePicker(context);
@@ -146,14 +147,14 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                     : [
                         switchButton(),
                         DropdownButtonFormField<String>(
-                          value: controller.typeValue.value,
+                          initialValue: controller.typeValue.value,
                           items: [
                             ...Constant.dropdownType.map(
                               (e) => DropdownMenuItem<String>(
                                 value: e,
                                 child: Text(e),
                               ),
-                            )
+                            ),
                           ],
                           decoration: const InputDecoration(labelText: 'Tipe'),
                           onChanged: (val) {
@@ -167,40 +168,42 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                         ),
                         TextField(
                           inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
+                            FilteringTextInputFormatter.digitsOnly,
                           ],
                           decoration: const InputDecoration(labelText: 'Biaya'),
                           controller: controller.amountController,
                           keyboardType: TextInputType.number,
                         ),
                         DropdownButtonFormField<String>(
-                          value: controller.paymentValue.value,
-                          isDense: false,
+                          initialValue: controller.paymentValue.value,
+                          isDense: true,
                           items: [
                             ...Constant.dropdownPayment.map(
                               (e) => DropdownMenuItem<String>(
-                                alignment: Alignment.topCenter,
+                                alignment: Alignment.center,
                                 value: e,
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(e),
-                                    Chip(
-                                      label: Text(
+                                    CircleAvatar(
+                                      backgroundColor: Colors.green,
+                                      child: Text(
                                         e.substring(0, 1),
                                         style: const TextStyle(
-                                            color: Colors.white),
+                                          color: Colors.white,
+                                        ),
                                       ),
-                                      backgroundColor: Colors.green,
                                     ),
                                   ],
                                 ),
                               ),
-                            )
+                            ),
                           ],
-                          decoration:
-                              const InputDecoration(labelText: 'Pembayaran'),
+                          decoration: const InputDecoration(
+                            labelText: 'Pembayaran',
+                          ),
                           onChanged: (val) {
                             controller.paymentValue.value = val!;
                             controller.update();
@@ -218,9 +221,7 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                               TextButton(
                                 child: const Text(
                                   'Pilih Tanggal',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 onPressed: () {
                                   _presentDatePicker(context);
@@ -249,24 +250,32 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
       builder: (controller) => Row(
         children: [
           Expanded(
-              child: tabButton(
-                  controller, controller.isExpense.value, "Pengeluaran")),
+            child: tabButton(
+              controller,
+              controller.isExpense.value,
+              "Pengeluaran",
+            ),
+          ),
           const SizedBox(width: 10),
           Expanded(
-              child: tabButton(
-                  controller, !controller.isExpense.value, "Pemasukan")),
+            child: tabButton(
+              controller,
+              !controller.isExpense.value,
+              "Pemasukan",
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget tabButton(
-      ExpenseAddController controller, bool isActive, String text) {
+    ExpenseAddController controller,
+    bool isActive,
+    String text,
+  ) {
     if (isActive) {
-      return ElevatedButton(
-        onPressed: () {},
-        child: Text(text),
-      );
+      return ElevatedButton(onPressed: () {}, child: Text(text));
     }
     return OutlinedButton(
       onPressed: controller.id() == ""

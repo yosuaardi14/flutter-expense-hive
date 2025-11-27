@@ -20,6 +20,7 @@ class ExpenseCalendarController extends ExpenseBaseController {
   final month = "0".obs;
   final year = "2024".obs;
   final listYear = <String>[].obs;
+  final selectedPayment = [...Constant.dropdownPayment].obs;
 
   @override
   void onInit() {
@@ -31,6 +32,7 @@ class ExpenseCalendarController extends ExpenseBaseController {
       DateTime.now().year - 2020 + 1,
       (index) => (2020 + index).toString(),
     );
+    listYear.value = listYear.reversed.toList();
   }
 
   @override
@@ -78,15 +80,37 @@ class ExpenseCalendarController extends ExpenseBaseController {
     update();
     listExpense.value = await dbService.fetchListData();
     if (mode.value == "Income") {
-      listExpense.value =
-          listExpense.where((e) => e.type == "Pemasukan").toList();
+      // if(payment.value != Constant.dropdownPayment[0]) {
+      //   listExpense.value =
+      //     listExpense.where((e) => (e.type == "Pemasukan") && (e.payment == payment.value)).toList();
+      // } else {
+      //   listExpense.value =
+      //     listExpense.where((e) => e.type == "Pemasukan").toList();
+      // }
+      listExpense.value = listExpense
+          .where(
+            (e) =>
+                (e.type == "Pemasukan") &&
+                selectedPayment.any((payment) => payment == e.payment),
+          )
+          .toList();
     } else {
       if (type.value != Constant.dropdownType[0]) {
-        listExpense.value =
-            listExpense.where((e) => e.type == type.value).toList();
+        listExpense.value = listExpense
+            .where(
+              (e) =>
+                  (e.type == type.value) &&
+                  selectedPayment.any((payment) => payment == e.payment),
+            )
+            .toList();
       } else {
-        listExpense.value =
-            listExpense.where((e) => e.type != "Pemasukan").toList();
+        listExpense.value = listExpense
+            .where(
+              (e) =>
+                  (e.type != "Pemasukan") &&
+                  selectedPayment.any((payment) => payment == e.payment),
+            )
+            .toList();
       }
     }
 
@@ -100,8 +124,9 @@ class ExpenseCalendarController extends ExpenseBaseController {
     int monthParam = int.parse(month.value);
     int yearParam = int.parse(year.value);
     final firstDayOfNextMonth = DateTime(yearParam, monthParam + 1, 1);
-    final lastDayOfThisMonth =
-        firstDayOfNextMonth.subtract(const Duration(days: 1));
+    final lastDayOfThisMonth = firstDayOfNextMonth.subtract(
+      const Duration(days: 1),
+    );
     daysInMonth.value = lastDayOfThisMonth.day;
     startWeekDay.value = DateTime(yearParam, monthParam, 1).weekday - 1;
     sisaWeekDay.value = (startWeekDay.value + daysInMonth.value) % 7;
@@ -117,46 +142,55 @@ class ExpenseCalendarController extends ExpenseBaseController {
   }
 
   void _groupByDate(RxList<Expense> list, RxMap<String, dynamic> data) {
-    Map<String, dynamic> newMap = groupBy(
-            list, (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date))
-        .map((k, v) {
-      return MapEntry(
-        k,
-        v.map(
-          (item) {
-            return item;
-          },
-        ).toList(),
-      );
-    });
-    Map<String, dynamic> sortedByKeyMap = Map.fromEntries(newMap.entries
-        .toList()
-      ..sort((e1, e2) =>
-          GF.stringToDateTime(e2.key).compareTo(GF.stringToDateTime(e1.key))));
+    Map<String, dynamic> newMap =
+        groupBy(
+          list,
+          (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date),
+        ).map((k, v) {
+          return MapEntry(
+            k,
+            v.map((item) {
+              return item;
+            }).toList(),
+          );
+        });
+    Map<String, dynamic> sortedByKeyMap = Map.fromEntries(
+      newMap.entries.toList()..sort(
+        (e1, e2) =>
+            GF.stringToDateTime(e2.key).compareTo(GF.stringToDateTime(e1.key)),
+      ),
+    );
     data.value = sortedByKeyMap;
   }
 
   Map<String, dynamic> totalSpending() {
-    final DateTime now =
-        DateTime(int.parse(year.value), int.parse(month.value));
-    List<Expense> yearExpense =
-        listExpense.where((element) => element.date.year == now.year).toList();
+    final DateTime now = DateTime(
+      int.parse(year.value),
+      int.parse(month.value),
+    );
+    List<Expense> yearExpense = listExpense
+        .where((element) => element.date.year == now.year)
+        .toList();
 
     List<Expense> lastMonthExpense = listExpense
-        .where((element) =>
-            element.date.month == now.month - 1 &&
-            element.date.year == now.year)
+        .where(
+          (element) =>
+              element.date.month == now.month - 1 &&
+              element.date.year == now.year,
+        )
         .toList();
 
     List<Expense> monthExpense = listExpense
-        .where((element) =>
-            element.date.month == now.month && element.date.year == now.year)
+        .where(
+          (element) =>
+              element.date.month == now.month && element.date.year == now.year,
+        )
         .toList();
 
     return {
       "Bulan ini": calcTotalSpending(monthExpense),
       "Bulan lalu": calcTotalSpending(lastMonthExpense),
-      "Tahun ini": calcTotalSpending(yearExpense)
+      "Tahun ini": calcTotalSpending(yearExpense),
     };
   }
 

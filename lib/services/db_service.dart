@@ -28,16 +28,20 @@ class DBService {
   }
 
   // this opens the database (and creates it if it doesn't exist)
-  _initDatabase() async {
+  dynamic _initDatabase() async {
     var dbPath = await getDatabasesPath();
     String path = join(dbPath, "$tableExpense.db");
-    return await openDatabase(path, version: 2, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   // SQL code to create the database table
   Future _onCreate(Database db, int version) async {
-    await db.execute(
-        '''CREATE TABLE $tableExpense ( 
+    await db.execute('''CREATE TABLE $tableExpense ( 
   $columnId TEXT PRIMARY KEY, 
   $columnTitle TEXT NOT NULL,
   $columnAmount DOUBLE NOT NULL,
@@ -46,11 +50,13 @@ class DBService {
   $columnDate DATE NOT NULL)''');
   }
 
-  void _onUpgrade(Database db, int oldVersion, int newVersion) async{
+  void _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < newVersion) {
       // you can execute drop table and create table
       // await db.execute("ALTER TABLE $tableExpense ADD COLUMN $columnType TEXT NULL;");
-      await db.execute("ALTER TABLE $tableExpense ADD COLUMN $columnPayment TEXT NULL;");
+      await db.execute(
+        "ALTER TABLE $tableExpense ADD COLUMN $columnPayment TEXT NULL;",
+      );
     }
   }
 
@@ -62,17 +68,19 @@ class DBService {
 
   Future<Expense?> fetchData(String id) async {
     Database db = await instance.database;
-    List<Map> maps = await db.query(tableExpense,
-        columns: [
-          columnId,
-          columnTitle,
-          columnAmount,
-          columnType,
-          columnPayment,
-          columnDate
-        ],
-        where: '$columnId = ?',
-        whereArgs: [id]);
+    List<Map> maps = await db.query(
+      tableExpense,
+      columns: [
+        columnId,
+        columnTitle,
+        columnAmount,
+        columnType,
+        columnPayment,
+        columnDate,
+      ],
+      where: '$columnId = ?',
+      whereArgs: [id],
+    );
     if (maps.isNotEmpty) {
       return Expense.fromMap(maps.first as Map<String, dynamic>);
     }
@@ -86,14 +94,26 @@ class DBService {
 
   Future<int> updateData(String id, Map<String, dynamic> expense) async {
     Database db = await instance.database;
-    return await db.update(tableExpense, expense,
-        where: '$columnId = ?', whereArgs: [id]);
+    return await db.update(
+      tableExpense,
+      expense,
+      where: '$columnId = ?',
+      whereArgs: [id],
+    );
   }
 
   Future<int> deleteData(String id) async {
     Database db = await instance.database;
-    return await db
-        .delete(tableExpense, where: '$columnId = ?', whereArgs: [id]);
+    return await db.delete(
+      tableExpense,
+      where: '$columnId = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> deleteAllData() async {
+    Database db = await instance.database;
+    return await db.delete(tableExpense);
   }
 
   Future close() async {

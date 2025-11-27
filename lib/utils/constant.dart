@@ -22,11 +22,11 @@ class Constant {
     "Kamis",
     "Jumat",
     "Sabtu",
-    "Minggu"
+    "Minggu",
   ];
 
   static Map<String, String> dropdownMonthOnly = {
-    ...Map<String, String>.from(dropdownMonth)..remove("0")
+    ...Map<String, String>.from(dropdownMonth)..remove("0"),
   };
 
   static const List<String> dropdownType = [
@@ -46,8 +46,5 @@ class Constant {
     "Lainnya",
   ];
 
-  static const List<String> mode = [
-    "Outcome",
-    "Income",
-  ];
+  static const List<String> mode = ["Outcome", "Income"];
 }

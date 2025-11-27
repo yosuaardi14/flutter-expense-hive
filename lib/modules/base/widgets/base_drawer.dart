@@ -38,18 +38,16 @@ class BaseDrawer extends StatelessWidget {
                 textColor: Colors.white,
               ),
             ),
-            ...drawerItem.entries.map(
-              (e) {
-                return ListTile(
-                  leading: getIcon(e.key),
-                  title: Text(e.key),
-                  selected: currentRoute == e.value,
-                  onTap: currentRoute != e.value
-                      ? () => Get.offNamed(e.value)
-                      : null,
-                );
-              },
-            ),
+            ...drawerItem.entries.map((e) {
+              return ListTile(
+                leading: getIcon(e.key),
+                title: Text(e.key),
+                selected: currentRoute == e.value,
+                onTap: currentRoute != e.value
+                    ? () => Get.offNamed(e.value)
+                    : null,
+              );
+            }),
           ],
         ),
       ),

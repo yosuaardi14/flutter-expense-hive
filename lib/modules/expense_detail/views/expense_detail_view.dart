@@ -8,8 +8,11 @@ class ExpenseDetailView extends StatelessWidget {
   const ExpenseDetailView({this.data, super.key});
 
   String rupiahFormat(double amount) {
-    return NumberFormat.currency(locale: "id", decimalDigits: 0, symbol: "Rp ")
-        .format(amount);
+    return NumberFormat.currency(
+      locale: "id",
+      decimalDigits: 0,
+      symbol: "Rp ",
+    ).format(amount);
   }
 
   Widget itemData(Expense data) {
@@ -20,12 +23,12 @@ class ExpenseDetailView extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         title: Text(data.title),
         subtitle: Text(data.type),
-        leading: Chip(
-          label: Text(
+        leading: CircleAvatar(
+          backgroundColor: Colors.green,
+          child: Text(
             data.payment.substring(0, 1),
             style: const TextStyle(color: Colors.white),
           ),
-          backgroundColor: Colors.green,
         ),
         trailing: Chip(label: Text(rupiahFormat(data.amount.toDouble()))),
       ),

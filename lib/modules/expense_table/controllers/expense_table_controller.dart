@@ -17,6 +17,7 @@ class ExpenseTableController extends ExpenseBaseController {
   final month = "0".obs;
   final year = "2024".obs;
   final listYear = <String>[].obs;
+  final selectedPayment = [...Constant.dropdownPayment].obs;
 
   @override
   void onInit() {
@@ -27,6 +28,7 @@ class ExpenseTableController extends ExpenseBaseController {
       DateTime.now().year - 2020 + 1,
       (index) => (2020 + index).toString(),
     );
+    listYear.value = listYear.reversed.toList();
   }
 
   @override
@@ -38,6 +40,9 @@ class ExpenseTableController extends ExpenseBaseController {
     isLoading = true;
     update();
     listExpense.value = await dbService.fetchListData();
+    listExpense.value = listExpense
+        .where((e) => selectedPayment.any((payment) => payment == e.payment))
+        .toList();
     calculateDayInMonth();
 
     isLoading = false;
@@ -48,8 +53,9 @@ class ExpenseTableController extends ExpenseBaseController {
     int monthParam = int.parse(month.value);
     int yearParam = int.parse(year.value);
     final firstDayOfNextMonth = DateTime(yearParam, monthParam + 1, 1);
-    final lastDayOfThisMonth =
-        firstDayOfNextMonth.subtract(const Duration(days: 1));
+    final lastDayOfThisMonth = firstDayOfNextMonth.subtract(
+      const Duration(days: 1),
+    );
     daysInMonth.value = lastDayOfThisMonth.day;
     _groupByDate(listExpense, expenseData);
   }
@@ -61,22 +67,24 @@ class ExpenseTableController extends ExpenseBaseController {
   }
 
   void _groupByDate(RxList<Expense> list, RxMap<String, dynamic> data) {
-    Map<String, dynamic> newMap = groupBy(
-            list, (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date))
-        .map((k, v) {
-      return MapEntry(
-        k,
-        v.map(
-          (item) {
-            return item;
-          },
-        ).toList(),
-      );
-    });
-    Map<String, dynamic> sortedByKeyMap = Map.fromEntries(newMap.entries
-        .toList()
-      ..sort((e1, e2) =>
-          GF.stringToDateTime(e1.key).compareTo(GF.stringToDateTime(e2.key))));
+    Map<String, dynamic> newMap =
+        groupBy(
+          list,
+          (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date),
+        ).map((k, v) {
+          return MapEntry(
+            k,
+            v.map((item) {
+              return item;
+            }).toList(),
+          );
+        });
+    Map<String, dynamic> sortedByKeyMap = Map.fromEntries(
+      newMap.entries.toList()..sort(
+        (e1, e2) =>
+            GF.stringToDateTime(e1.key).compareTo(GF.stringToDateTime(e2.key)),
+      ),
+    );
     data.value = sortedByKeyMap;
 
     //

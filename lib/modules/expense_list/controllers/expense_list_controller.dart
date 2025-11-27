@@ -18,6 +18,7 @@ class ExpenseListController extends ExpenseBaseController {
   final filterValue = {
     "type": "Semua",
     "payment": "Semua",
+    "source": "Semua",
     "month": DateTime.now().month.toString(),
     "year": DateTime.now().year.toString(),
   }.obs;
@@ -28,10 +29,12 @@ class ExpenseListController extends ExpenseBaseController {
   @override
   void onInit() {
     super.onInit();
-    listYear.addAll(List.generate(
-      DateTime.now().year - 2020 + 1,
-      (index) => (2020 + index).toString(),
-    ));
+    listYear.addAll(
+      List.generate(
+        DateTime.now().year - 2020 + 1,
+        (index) => (2020 + index).toString(),
+      ).reversed,
+    );
   }
 
   void changePage(int value) {
@@ -45,6 +48,7 @@ class ExpenseListController extends ExpenseBaseController {
     filterValue({
       "type": "Semua",
       "payment": "Semua",
+      "source": "Semua",
       "month": DateTime.now().month.toString(),
       "year": DateTime.now().year.toString(),
     });
@@ -52,14 +56,16 @@ class ExpenseListController extends ExpenseBaseController {
   }
 
   void listData() async {
-    print("listData");
+    // print("listData");
     isLoading = true;
     update();
     listExpense.value = await dbService.fetchListData();
     listExpenseMaster.value = List<Expense>.from(listExpense);
     listExpense.value = listExpense
-        .where((e) =>
-            isExpense.value ? e.type != "Pemasukan" : e.type == "Pemasukan")
+        .where(
+          (e) =>
+              isExpense.value ? e.type != "Pemasukan" : e.type == "Pemasukan",
+        )
         .toList();
     // if (isFilter) {
     //   _groupByDate(listExpenseMaster, expenseData);
@@ -68,14 +74,19 @@ class ExpenseListController extends ExpenseBaseController {
     // }
     if (filterValue["month"] != "0") {
       listExpense.value = listExpense
-          .where((element) =>
-              element.date.month == int.parse(filterValue["month"].toString()))
+          .where(
+            (element) =>
+                element.date.month ==
+                int.parse(filterValue["month"].toString()),
+          )
           .toList();
     }
     if (filterValue["year"] != "Semua") {
       listExpense.value = listExpense
-          .where((element) =>
-              element.date.year == int.parse(filterValue["year"].toString()))
+          .where(
+            (element) =>
+                element.date.year == int.parse(filterValue["year"].toString()),
+          )
           .toList();
     }
     if (filterValue["type"] != "Semua") {
@@ -88,6 +99,11 @@ class ExpenseListController extends ExpenseBaseController {
           .where((element) => element.payment == filterValue["payment"])
           .toList();
     }
+    if (filterValue["source"] != "Semua") {
+      listExpense.value = listExpense
+          .where((element) => element.payment == filterValue["source"])
+          .toList();
+    }
     _groupByDate(listExpense, expenseData);
     isLoading = false;
     update();
@@ -97,6 +113,8 @@ class ExpenseListController extends ExpenseBaseController {
     if (!isExpense.value) {
       data["type"] = "Semua";
       data["payment"] = "Semua";
+    } else {
+      data["source"] = "Semua";
     }
     filterValue(data);
     listData();
@@ -163,7 +181,11 @@ class ExpenseListController extends ExpenseBaseController {
       //       ),
       //     ) &&
       //     tx.date.month == DateTime.now().month;
-      return tx.date.isAfter(startOfWeek) &&
+
+      return (isExpense.value
+              ? tx.type != "Pemasukan"
+              : tx.type == "Pemasukan") &&
+          tx.date.isAfter(startOfWeek) &&
           tx.date.isBefore(endOfWeek) &&
           tx.date.month == now.month;
     }).toList();
@@ -172,25 +194,47 @@ class ExpenseListController extends ExpenseBaseController {
   Map<String, dynamic> totalSpending() {
     final DateTime now = DateTime.now();
     List<Expense> yearExpense = listExpenseMaster
-        .where((element) => element.date.year == now.year)
+        .where(
+          (element) =>
+              (isExpense.value
+                  ? element.type != "Pemasukan"
+                  : element.type == "Pemasukan") &&
+              element.date.year == now.year,
+        )
         .toList();
 
     List<Expense> lastMonthExpense = listExpenseMaster
-        .where((element) =>
-            element.date.month == now.month - 1 &&
-            element.date.year == now.year)
+        .where(
+          (element) =>
+              (isExpense.value
+                  ? element.type != "Pemasukan"
+                  : element.type == "Pemasukan") &&
+              element.date.month == now.month - 1 &&
+              element.date.year == now.year,
+        )
         .toList();
 
     List<Expense> monthExpense = listExpenseMaster
-        .where((element) =>
-            element.date.month == now.month && element.date.year == now.year)
+        .where(
+          (element) =>
+              (isExpense.value
+                  ? element.type != "Pemasukan"
+                  : element.type == "Pemasukan") &&
+              element.date.month == now.month &&
+              element.date.year == now.year,
+        )
         .toList();
 
     List<Expense> todayExpense = listExpenseMaster
-        .where((element) =>
-            element.date.day == now.day &&
-            element.date.month == now.month &&
-            element.date.year == now.year)
+        .where(
+          (element) =>
+              (isExpense.value
+                  ? element.type != "Pemasukan"
+                  : element.type == "Pemasukan") &&
+              element.date.day == now.day &&
+              element.date.month == now.month &&
+              element.date.year == now.year,
+        )
         .toList();
 
     return {
@@ -199,7 +243,7 @@ class ExpenseListController extends ExpenseBaseController {
       "Bulan ini": totalSpend(monthExpense),
       "Bulan lalu": totalSpend(lastMonthExpense),
       "Tahun ini": totalSpend(yearExpense),
-      "List": totalSpend(listExpense)
+      "List": totalSpend(listExpense),
     };
   }
 
@@ -208,22 +252,24 @@ class ExpenseListController extends ExpenseBaseController {
   }
 
   void _groupByDate(RxList<Expense> list, RxMap<String, dynamic> data) {
-    Map<String, dynamic> newMap = groupBy(
-            list, (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date))
-        .map((k, v) {
-      return MapEntry(
-        k,
-        v.map(
-          (item) {
-            return item;
-          },
-        ).toList(),
-      );
-    });
-    Map<String, dynamic> sortedByKeyMap = Map.fromEntries(newMap.entries
-        .toList()
-      ..sort((e1, e2) =>
-          GF.stringToDateTime(e2.key).compareTo(GF.stringToDateTime(e1.key))));
+    Map<String, dynamic> newMap =
+        groupBy(
+          list,
+          (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date),
+        ).map((k, v) {
+          return MapEntry(
+            k,
+            v.map((item) {
+              return item;
+            }).toList(),
+          );
+        });
+    Map<String, dynamic> sortedByKeyMap = Map.fromEntries(
+      newMap.entries.toList()..sort(
+        (e1, e2) =>
+            GF.stringToDateTime(e2.key).compareTo(GF.stringToDateTime(e1.key)),
+      ),
+    );
     data.value = sortedByKeyMap;
   }
 }
