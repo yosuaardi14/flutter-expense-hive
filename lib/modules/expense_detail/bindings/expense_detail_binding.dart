@@ -5,8 +5,6 @@ import '../controllers/expense_detail_controller.dart';
 class ExpenseDetailBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<ExpenseDetailController>(
-      () => ExpenseDetailController(),
-    );
+    Get.lazyPut<ExpenseDetailController>(() => ExpenseDetailController());
   }
 }

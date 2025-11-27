@@ -14,6 +14,8 @@ import '../modules/expense_table/bindings/expense_table_binding.dart';
 import '../modules/expense_table/views/expense_table_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/setting/setting_binding.dart';
+import '../modules/setting/setting_view.dart';
 
 part 'app_routes.dart';
 
@@ -52,6 +54,11 @@ class AppPages {
       name: _Paths.EXPENSE_TABLE,
       page: () => const ExpenseTableView(),
       binding: ExpenseTableBinding(),
+    ),
+    GetPage(
+      name: _Paths.SETTING,
+      page: () => const SettingView(),
+      binding: SettingBinding(),
     ),
   ];
 }

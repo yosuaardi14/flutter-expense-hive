@@ -25,4 +25,39 @@ class Expense {
       date: DateTime.parse(map["date"]),
     );
   }
+
+  factory Expense.fromList(List<dynamic> list) {
+    return Expense(
+      id: list[0],
+      title: list[1],
+      amount: double.tryParse(list[2].toString()) ?? 0,
+      type: list[3],
+      payment: list[4],
+      date: DateTime.tryParse(list[5].toString()) ?? DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "id": id,
+      "title": title,
+      "amount": amount,
+      "type": type,
+      "payment": payment,
+      "date": date.toString(),
+    };
+  }
+
+  static List<String> props() => [
+    "id",
+    "title",
+    "amount",
+    "type",
+    "payment",
+    "date",
+  ];
+
+  List<dynamic> toList() {
+    return [id, title, amount, type, payment, date.toString()];
+  }
 }

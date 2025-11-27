@@ -10,6 +10,7 @@ abstract class Routes {
   static const EXPENSE_DETAIL = _Paths.EXPENSE_DETAIL;
   static const EXPENSE_CALENDAR = _Paths.EXPENSE_CALENDAR;
   static const EXPENSE_TABLE = _Paths.EXPENSE_TABLE;
+  static const SETTING = _Paths.SETTING;
 }
 
 abstract class _Paths {
@@ -19,4 +20,5 @@ abstract class _Paths {
   static const EXPENSE_DETAIL = '/expense-detail';
   static const EXPENSE_CALENDAR = '/expense-calendar';
   static const EXPENSE_TABLE = '/expense-table';
+  static const SETTING = '/setting';
 }

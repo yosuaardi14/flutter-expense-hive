@@ -22,12 +22,11 @@ class HiveService {
   Future<List<Expense>> fetchListData() async {
     Box db = await instance.database;
     //await db.clear();
-    List<Expense> maps = db
-        .toMap()
-        .entries
-        .map((e) => Expense.fromMap(
-            jsonDecode(jsonEncode(e.value)) as Map<String, dynamic>))
-        .toList();
+    List<Expense> maps = db.toMap().entries.map((e) {
+      return Expense.fromMap(
+        jsonDecode(jsonEncode(e.value)) as Map<String, dynamic>,
+      );
+    }).toList();
     return maps;
   }
 
@@ -53,6 +52,11 @@ class HiveService {
   Future<void> deleteData(String id) async {
     Box db = await instance.database;
     return await db.delete(id);
+  }
+
+  Future<int> deleteAllData() async {
+    Box db = await instance.database;
+    return await db.clear();
   }
 
   Future close() async {

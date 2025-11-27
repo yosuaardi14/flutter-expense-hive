@@ -14,8 +14,11 @@ class ExpenseListView extends GetView<ExpenseListController> {
   const ExpenseListView({super.key});
 
   String rupiahFormat(double amount) {
-    return NumberFormat.currency(locale: "id", decimalDigits: 0, symbol: "Rp ")
-        .format(amount);
+    return NumberFormat.currency(
+      locale: "id",
+      decimalDigits: 0,
+      symbol: "Rp ",
+    ).format(amount);
   }
 
   void displayChart() {
@@ -81,20 +84,18 @@ class ExpenseListView extends GetView<ExpenseListController> {
         // ),
         title: Text(data.title),
         subtitle: Text(data.type),
-        leading: Chip(
-          label: Text(
+        leading: CircleAvatar(
+          backgroundColor: Colors.green,
+          child: Text(
             data.payment.substring(0, 1),
             style: const TextStyle(color: Colors.white),
           ),
-          backgroundColor: Colors.green,
         ),
         onTap: () {
           Get.put(ExpenseAddController());
           Get.bottomSheet(
             const ExpenseAddView(),
-            settings: RouteSettings(
-              arguments: data.id,
-            ),
+            settings: RouteSettings(arguments: data.id),
           ).then((value) {
             controller.listData();
           });
@@ -110,10 +111,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
                   controller.deleteData(data.id);
                 }
               },
-              icon: const Icon(
-                Icons.delete,
-                color: Colors.red,
-              ),
+              icon: const Icon(Icons.delete, color: Colors.red),
             ),
           ],
         ),
@@ -295,15 +293,15 @@ class ExpenseListView extends GetView<ExpenseListController> {
           children: c.isLoading
               ? [const Center(child: CircularProgressIndicator())]
               : controller.expenseData.entries.isEmpty
-                  ? [
-                      const SizedBox(height: 10),
-                      const Center(child: Text("Data tidak ditemukan"))
-                    ]
-                  : [
-                      ...controller.expenseData.entries.map(
-                        (e) => expansionData(e.key, e.value),
-                      ),
-                    ],
+              ? [
+                  const SizedBox(height: 10),
+                  const Center(child: Text("Data tidak ditemukan")),
+                ]
+              : [
+                  ...controller.expenseData.entries.map(
+                    (e) => expansionData(e.key, e.value),
+                  ),
+                ],
         ),
       ),
     );
@@ -464,8 +462,11 @@ class ExpenseListView extends GetView<ExpenseListController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Obx(() => Text(
-            'Expense App - ${controller.isExpense.value ? "Outcome" : "Income"}')),
+        title: Obx(
+          () => Text(
+            'Expense App - ${controller.isExpense.value ? "Outcome" : "Income"}',
+          ),
+        ),
         centerTitle: false,
         actions: [
           IconButton(
@@ -473,7 +474,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
               controller.switchList();
             },
             icon: const Icon(Icons.currency_exchange),
-          )
+          ),
         ],
       ),
       // drawer: const BaseDrawer(),
@@ -487,14 +488,16 @@ class ExpenseListView extends GetView<ExpenseListController> {
       body: RefreshIndicator(
         onRefresh: () async => controller.listData(),
         child: GetBuilder<ExpenseListController>(
-          builder: (c) => Column(children: [
-            // showButton,
-            ...filter(),
-            if (c.showChart) dashboard,
-            // filterDropdown,
-            if (c.showList) listItem,
-            //const SizedBox(height: 75),
-          ]),
+          builder: (c) => Column(
+            children: [
+              // showButton,
+              ...filter(),
+              if (c.showChart) dashboard,
+              // filterDropdown,
+              if (c.showList) listItem,
+              //const SizedBox(height: 75),
+            ],
+          ),
         ),
       ),
     );
@@ -502,21 +505,44 @@ class ExpenseListView extends GetView<ExpenseListController> {
 
   List<Widget> filter() {
     return [
-      if (controller.isExpense.value)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Row(
-            children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        child: Row(
+          spacing: 10,
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                initialValue: controller.isExpense.value
+                    ? controller.filterValue["payment"]
+                    : controller.filterValue["source"],
+                items: [
+                  ...Constant.dropdownPayment.map(
+                    (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+                  ),
+                ],
+                decoration: InputDecoration(
+                  labelText: controller.isExpense.value
+                      ? 'Pembayaran'
+                      : 'Sumber',
+                ),
+                onChanged: (val) {
+                  controller.filterValue[controller.isExpense.value
+                          ? "payment"
+                          : "source"] =
+                      val!;
+                  controller.update();
+                  controller.filterData(controller.filterValue());
+                },
+              ),
+            ),
+            if (controller.isExpense.value)
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: controller.filterValue["type"],
+                  initialValue: controller.filterValue["type"],
                   items: [
                     ...Constant.dropdownType.map(
-                      (e) => DropdownMenuItem<String>(
-                        value: e,
-                        child: Text(e),
-                      ),
-                    )
+                      (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+                    ),
                   ],
                   decoration: const InputDecoration(labelText: 'Tipe'),
                   onChanged: (val) {
@@ -526,68 +552,45 @@ class ExpenseListView extends GetView<ExpenseListController> {
                   },
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: controller.filterValue["payment"],
-                  items: [
-                    ...Constant.dropdownPayment.map(
-                      (e) => DropdownMenuItem<String>(
-                        value: e,
-                        child: Text(e),
-                      ),
-                    )
-                  ],
-                  decoration: const InputDecoration(labelText: 'Pembayaran'),
-                  onChanged: (val) {
-                    controller.filterValue["payment"] = val!;
-                    controller.update();
-                    controller.filterData(controller.filterValue());
-                  },
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
+      ),
 
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5),
         child: Row(
+          spacing: 10,
           children: [
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: controller.filterValue["month"],
+                initialValue: controller.filterValue["year"],
+                items: [
+                  ...controller.listYear.map(
+                    (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+                  ),
+                ],
+                decoration: const InputDecoration(labelText: 'Tahun'),
+                onChanged: (val) {
+                  controller.filterValue["year"] = val!;
+                  controller.update();
+                  controller.filterData(controller.filterValue());
+                },
+              ),
+            ),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                initialValue: controller.filterValue["month"],
                 items: [
                   ...Constant.dropdownMonth.entries.map(
                     (e) => DropdownMenuItem<String>(
                       value: e.key,
                       child: Text(e.value),
                     ),
-                  )
+                  ),
                 ],
                 decoration: const InputDecoration(labelText: 'Bulan'),
                 onChanged: (val) {
                   controller.filterValue["month"] = val!;
-                  controller.update();
-                  controller.filterData(controller.filterValue());
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: controller.filterValue["year"],
-                items: [
-                  ...controller.listYear.map(
-                    (e) => DropdownMenuItem<String>(
-                      value: e,
-                      child: Text(e),
-                    ),
-                  )
-                ],
-                decoration: const InputDecoration(labelText: 'Tahun'),
-                onChanged: (val) {
-                  controller.filterValue["year"] = val!;
                   controller.update();
                   controller.filterData(controller.filterValue());
                 },
@@ -608,8 +611,10 @@ class ExpenseListView extends GetView<ExpenseListController> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                GF.rupiahFormat(controller.totalSpending()["List"],
-                    symbol: "Rp"),
+                GF.rupiahFormat(
+                  controller.totalSpending()["List"],
+                  symbol: "Rp",
+                ),
               ),
             ],
           ),
@@ -626,6 +631,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
                   controller.filterData({
                     "type": "Semua",
                     "payment": "Semua",
+                    "source": "Semua",
                     "month": DateTime.now().month.toString(),
                     "year": DateTime.now().year.toString(),
                   });

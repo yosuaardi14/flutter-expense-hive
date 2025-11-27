@@ -5,8 +5,6 @@ import '../controllers/expense_calendar_controller.dart';
 class ExpenseCalendarBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<ExpenseCalendarController>(
-      () => ExpenseCalendarController(),
-    );
+    Get.lazyPut<ExpenseCalendarController>(() => ExpenseCalendarController());
   }
 }

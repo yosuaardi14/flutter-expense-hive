@@ -92,7 +92,7 @@ class ExpenseFilterDialog extends StatelessWidget {
   //   );
   // }
 
-  void initData(args) {
+  void initData(dynamic args) {
     if (args == null) {
       type.value = "Semua";
       payment.value = "Semua";
@@ -118,14 +118,11 @@ class ExpenseFilterDialog extends StatelessWidget {
               // const Text("Expense Filter"),
               Obx(
                 () => DropdownButtonFormField<String>(
-                  value: type.value,
+                  initialValue: type.value,
                   items: [
                     ...Constant.dropdownType.map(
-                      (e) => DropdownMenuItem<String>(
-                        value: e,
-                        child: Text(e),
-                      ),
-                    )
+                      (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+                    ),
                   ],
                   decoration: const InputDecoration(labelText: 'Tipe'),
                   onChanged: (val) {
@@ -135,7 +132,7 @@ class ExpenseFilterDialog extends StatelessWidget {
               ),
               DropdownButtonFormField<String>(
                 isDense: false,
-                value: payment.value,
+                initialValue: payment.value,
                 items: [
                   ...Constant.dropdownPayment.map(
                     (e) => DropdownMenuItem<String>(
@@ -154,7 +151,7 @@ class ExpenseFilterDialog extends StatelessWidget {
                         ],
                       ),
                     ),
-                  )
+                  ),
                 ],
                 decoration: const InputDecoration(labelText: 'Pembayaran'),
                 onChanged: (val) {
@@ -162,14 +159,14 @@ class ExpenseFilterDialog extends StatelessWidget {
                 },
               ),
               DropdownButtonFormField<String>(
-                value: month.value,
+                initialValue: month.value,
                 items: [
                   ...Constant.dropdownMonth.entries.map(
                     (e) => DropdownMenuItem<String>(
                       value: e.key,
                       child: Text(e.value),
                     ),
-                  )
+                  ),
                 ],
                 decoration: const InputDecoration(labelText: 'Bulan'),
                 onChanged: (val) {
@@ -180,8 +177,9 @@ class ExpenseFilterDialog extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      style:
-                          ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
                       onPressed: () {
                         Navigator.pop(context, {
                           "type": "Semua",
@@ -231,7 +229,7 @@ class ExpenseFilterDialog extends StatelessWidget {
                   //   ),
                   // ),
                 ],
-              )
+              ),
             ],
           ),
         ),
