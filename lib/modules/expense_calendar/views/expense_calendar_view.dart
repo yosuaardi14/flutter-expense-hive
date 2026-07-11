@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 
 import '../../../utils/constant.dart';
 import '../../base/widgets/base_app_bar.dart';
-// import '../../base/widgets/base_drawer.dart';
+import '../../base/widgets/base_drawer.dart';
 import '../controllers/expense_calendar_controller.dart';
 
 class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
@@ -19,7 +19,7 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
         postFixtitleText: " - Calendar",
         centerTitle: false,
       ),
-      // drawer: const BaseDrawer(),
+      drawer: const BaseDrawer(),
       body: GetBuilder<ExpenseCalendarController>(
         init: controller..listData(),
         builder: (controller) {
@@ -117,7 +117,7 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                                   ),
                                 ],
                                 decoration: const InputDecoration(
-                                  labelText: 'Tipe',
+                                  labelText: 'Kategori',
                                 ),
                                 onChanged: (val) {
                                   controller.type.value = val!;
@@ -374,9 +374,11 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    Text(
-                                      controller.rupiahFormat(totalSpend),
-                                      style: const TextStyle(fontSize: 12),
+                                    FittedBox(
+                                      child: Text(
+                                        controller.rupiahFormat(totalSpend),
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
                                     ),
                                   ],
                                 ),

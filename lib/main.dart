@@ -17,10 +17,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Expense App',
-      theme: ThemeData(
-        useMaterial3: false,
-        primarySwatch: Colors.purple,
-      ),
+      theme: ThemeData(useMaterial3: false, primarySwatch: Colors.purple),
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
     );

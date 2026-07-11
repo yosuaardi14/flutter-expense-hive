@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -26,9 +24,15 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
       return;
     }
 
-    bool add = await GF.showConfirmationAddDialog();
+    bool add = await GF.showConfirmationAddDialog(
+      isEdit: controller.id.isNotEmpty,
+    );
     if (add) {
-      controller.insertData().whenComplete(() => Navigator.of(context).pop());
+      controller.insertData().whenComplete(() {
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      });
     }
   }
 
@@ -73,7 +77,7 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                               ),
                             ),
                           ],
-                          decoration: const InputDecoration(labelText: 'Tipe'),
+                          decoration: const InputDecoration(labelText: 'Kategori'),
                           onChanged: (val) {
                             controller.typeValue.value = val!;
                           },
@@ -156,7 +160,7 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                               ),
                             ),
                           ],
-                          decoration: const InputDecoration(labelText: 'Tipe'),
+                          decoration: const InputDecoration(labelText: 'Kategori'),
                           onChanged: (val) {
                             controller.typeValue.value = val!;
                             controller.update();

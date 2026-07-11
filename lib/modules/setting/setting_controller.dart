@@ -27,13 +27,27 @@ class SettingController extends ExpenseBaseController {
     }
   }
 
+  void exportBudgetToCSV() async {
+    listBudget.value = await dbService.fetchListDataBudget();
+    List<List<dynamic>> data = [...listBudget.map((e) => e.toList())];
+    CsvUtil.export(data);
+  }
+
+  void onClickBudgetImport() {
+    if (file.value?.bytes != null) {
+      Get.back(result: CsvUtil.import(file.value!.bytes!));
+    } else {
+      GF.showInformationDialog("Peringatan", "Anda belum memilih File");
+    }
+  }
+
   void onChangedImportMode(String? val) {
     importMode.value = val ?? "Merge";
     update();
   }
 
   void onChooseFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       withData: true,
       type: FileType.custom,
       allowedExtensions: ["csv"],
@@ -111,10 +125,19 @@ class SettingController extends ExpenseBaseController {
 
   void resetData() async {
     final result = await GF.showConfirmationDeleteDialog(
-      message: "Apakah Anda yakin ingin menghapus semua data?",
+      message: "Apakah Anda yakin ingin menghapus semua data Expense?",
     );
     if (result) {
       await dbService.deleteAllData();
+    }
+  }
+
+  void resetDataBudget() async {
+    final result = await GF.showConfirmationDeleteDialog(
+      message: "Apakah Anda yakin ingin menghapus semua data Budget?",
+    );
+    if (result) {
+      await dbService.deleteAllDataBudget();
     }
   }
 

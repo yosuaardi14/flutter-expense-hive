@@ -9,14 +9,14 @@ import 'package:intl/intl.dart';
 abstract class CsvUtil {
   static List<List<dynamic>> import(Uint8List bytes) {
     String csv = String.fromCharCodes(bytes);
-    List<List<dynamic>> data = CsvToListConverter(
+    List<List<dynamic>> data = CsvDecoder(
       fieldDelimiter: ";",
     ).convert(csv);
     return data;
   }
 
   static Future<void> export(List<List<dynamic>> data) async {
-    String csv = const ListToCsvConverter(fieldDelimiter: ";").convert(data);
+    String csv = const CsvEncoder(fieldDelimiter: ";").convert(data);
     String fileName =
         "EXPORT_${DateFormat("yyyy_MM_dd_hh_mm_ss").format(DateTime.now())}.csv";
     // Export to File

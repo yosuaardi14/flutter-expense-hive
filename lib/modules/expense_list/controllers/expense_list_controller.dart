@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
+import 'package:flutter_expense_app/utils/constant.dart';
 import 'package:get/get.dart';
 import "package:collection/collection.dart";
 import 'package:intl/intl.dart';
@@ -25,6 +26,7 @@ class ExpenseListController extends ExpenseBaseController {
   final listExpenseMaster = <Expense>[].obs;
   final isExpense = true.obs;
   final listYear = <String>["Semua"].obs;
+  final selectedPayment = [...Constant.dropdownPayment].obs;
 
   @override
   void onInit() {
@@ -45,13 +47,13 @@ class ExpenseListController extends ExpenseBaseController {
     isExpense.toggle();
     update();
     isFilter = false;
-    filterValue({
-      "type": "Semua",
-      "payment": "Semua",
-      "source": "Semua",
-      "month": DateTime.now().month.toString(),
-      "year": DateTime.now().year.toString(),
-    });
+    // filterValue({
+    //   "type": "Semua",
+    //   "payment": "Semua",
+    //   "source": "Semua",
+    //   "month": DateTime.now().month.toString(),
+    //   "year": DateTime.now().year.toString(),
+    // });
     listData();
   }
 
@@ -94,16 +96,19 @@ class ExpenseListController extends ExpenseBaseController {
           .where((element) => element.type == filterValue["type"])
           .toList();
     }
-    if (filterValue["payment"] != "Semua") {
+    // if (filterValue["payment"] != "Semua") {
+    //   listExpense.value = listExpense
+    //       .where((element) => selectedPayment.any((payment) => payment == element.payment))
+    //       .toList();
+    // }
+    // if (filterValue["source"] != "Semua") {
       listExpense.value = listExpense
-          .where((element) => element.payment == filterValue["payment"])
+          .where(
+            (element) =>
+                selectedPayment.any((payment) => payment == element.payment),
+          )
           .toList();
-    }
-    if (filterValue["source"] != "Semua") {
-      listExpense.value = listExpense
-          .where((element) => element.payment == filterValue["source"])
-          .toList();
-    }
+    // }
     _groupByDate(listExpense, expenseData);
     isLoading = false;
     update();
@@ -160,7 +165,9 @@ class ExpenseListController extends ExpenseBaseController {
   List<Expense> get _weekExpenses {
     DateTime now = DateUtils.dateOnly(DateTime.now());
     DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
+    DateTime endOfWeek = startOfWeek
+        .add(const Duration(days: 7))
+        .subtract(Duration(microseconds: 1));
     return listExpenseMaster.where((tx) {
       // String date = DateTime.now().toString();
       // String firstDay = '${date.substring(0, 8)}01${date.substring(10)}';

@@ -2,12 +2,22 @@
 
 import 'package:get/get.dart';
 
+import '../modules/budget_add/bindings/budget_add_binding.dart';
+import '../modules/budget_add/views/budget_add_view.dart';
+import '../modules/budget_dashboard/bindings/budget_home_binding.dart';
+import '../modules/budget_dashboard/views/budget_dashboard_view.dart';
+import '../modules/budget_home/bindings/budget_home_binding.dart';
+import '../modules/budget_home/views/budget_home_view.dart';
+import '../modules/budget_list/bindings/budget_list_binding.dart';
+import '../modules/budget_list/views/budget_list_view.dart';
 import '../modules/expense_add/bindings/expense_add_binding.dart';
 import '../modules/expense_add/views/expense_add_view.dart';
 import '../modules/expense_calendar/bindings/expense_calendar_binding.dart';
 import '../modules/expense_calendar/views/expense_calendar_view.dart';
 import '../modules/expense_detail/bindings/expense_detail_binding.dart';
 import '../modules/expense_detail/views/expense_detail_view.dart';
+import '../modules/expense_home/bindings/expense_home_binding.dart';
+import '../modules/expense_home/views/expense_home_view.dart';
 import '../modules/expense_list/bindings/expense_list_binding.dart';
 import '../modules/expense_list/views/expense_list_view.dart';
 import '../modules/expense_table/bindings/expense_table_binding.dart';
@@ -22,13 +32,28 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = "/";
+  static const INITIAL = "/expense";
 
   static final routes = [
     GetPage(
-      name: "/",
+      name: _Paths.HOME,
       page: () => const HomeView(),
       binding: HomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.EXPENSE,
+      page: () => const ExpenseHomeView(),
+      binding: ExpenseHomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.BUDGET,
+      page: () => const BudgetHomeView(),
+      binding: BudgetHomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.SETTING,
+      page: () => const SettingView(),
+      binding: SettingBinding(),
     ),
     GetPage(
       name: _Paths.EXPENSE_LIST,
@@ -56,9 +81,19 @@ class AppPages {
       binding: ExpenseTableBinding(),
     ),
     GetPage(
-      name: _Paths.SETTING,
-      page: () => const SettingView(),
-      binding: SettingBinding(),
+      name: _Paths.BUDGET_LIST,
+      page: () => const BudgetListView(),
+      binding: BudgetListBinding(),
+    ),
+    GetPage(
+      name: _Paths.BUDGET_ADD,
+      page: () => const BudgetAddView(),
+      binding: BudgetAddBinding(),
+    ),
+    GetPage(
+      name: _Paths.BUDGET_DASHBOARD,
+      page: () => const BudgetDashboardView(),
+      binding: BudgetDashboardBinding(),
     ),
   ];
 }

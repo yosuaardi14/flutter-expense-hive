@@ -28,11 +28,11 @@ class Expense {
 
   factory Expense.fromList(List<dynamic> list) {
     return Expense(
-      id: list[0],
-      title: list[1],
+      id: list[0].toString(),
+      title: list[1].toString(),
       amount: double.tryParse(list[2].toString()) ?? 0,
-      type: list[3],
-      payment: list[4],
+      type: list[3].toString(),
+      payment: list[4].toString(),
       date: DateTime.tryParse(list[5].toString()) ?? DateTime.now(),
     );
   }

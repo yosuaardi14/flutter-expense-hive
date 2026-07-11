@@ -32,8 +32,21 @@ class Constant {
   static const List<String> dropdownType = [
     "Semua",
     "Makan",
-    "Kebutuhan",
+    "Minum",
+    "Kebutuhan", // Belanja Pokok
+    "Tagihan",
+    "Jasa",
+    "Belanja",
+    "Transportasi",
+    "Kesehatan",
+    "Sosial",
+    "Keuangan",
+    "Gaya Hidup",
     "Lainnya",
+  ];
+
+  static List<String> dropdownTypeOnly = [
+    ...List<String>.from(dropdownType).sublist(1),
   ];
 
   static const List<String> dropdownPayment = [
@@ -47,4 +60,10 @@ class Constant {
   ];
 
   static const List<String> mode = ["Outcome", "Income"];
+
+  static const List<String> dropdownBudgetPeriod = [
+    "Per Hari",
+    "Per Minggu",
+    "Per Bulan",
+  ];
 }
