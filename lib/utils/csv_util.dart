@@ -15,10 +15,10 @@ abstract class CsvUtil {
     return data;
   }
 
-  static Future<void> export(List<List<dynamic>> data) async {
+  static Future<void> export(List<List<dynamic>> data, {String type = "EXPENSE"}) async {
     String csv = const CsvEncoder(fieldDelimiter: ";").convert(data);
     String fileName =
-        "EXPORT_${DateFormat("yyyy_MM_dd_hh_mm_ss").format(DateTime.now())}.csv";
+        "EXPORT_${type}_${DateFormat("yyyy_MM_dd_hh_mm_ss").format(DateTime.now())}.csv";
     // Export to File
     try {
       if (kIsWeb) {

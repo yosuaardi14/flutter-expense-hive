@@ -63,56 +63,81 @@ class SettingController extends ExpenseBaseController {
     final result = await Get.bottomSheet<List<List<dynamic>>?>(
       const ImportDialog(),
     );
-    if (result == null) {
-      return;
+    if (result == null || result.isEmpty) {
+      return GF.showInformationDialog("Peringatan", "Data tidak ditemukan");
     }
-    // Insert data -> Import sebagai data baru
-    if (importMode.value == "Insert") {
-      for (var i = 0; i < result.length; i++) {
-        // Import semua data yang belum ada
-        Expense expense = Expense.fromList(result[i]);
-        // Expense? expenseData = await dbService.fetchData(expense.id);
-        // if (expenseData == null) {
-        //   await dbService.insertData(expense.toMap());
-        // }
-        // // Import semua data sebagai data baru
-        expense.id = DateTime.now().toString();
-        await expenseService.insertData(expense.toMap());
-      }
-      GF.showInformationDialog("Berhasil", "Import data Berhasil");
-    }
-    // Merge data -> Menambahkan data yang belum ada
-    else if (importMode.value == "Merge") {
-      for (var i = 0; i < result.length; i++) {
-        // Import semua data yang belum ada
-        Expense expense = Expense.fromList(result[i]);
-        Expense? expenseData = await expenseService.fetchData(expense.id);
-        if (expenseData == null) {
+    try {
+      int counter = 0;
+      // Insert data -> Import sebagai data baru
+      if (importMode.value == "Insert") {
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].length != Expense.props().length) {
+            continue;
+          }
+          // Import semua data yang belum ada
+          Expense expense = Expense.fromList(result[i]);
+          // Expense? expenseData = await dbService.fetchData(expense.id);
+          // if (expenseData == null) {
+          //   await dbService.insertData(expense.toMap());
+          // }
+          // // Import semua data sebagai data baru
+          expense.id = DateTime.now().toString();
           await expenseService.insertData(expense.toMap());
+          counter++;
         }
       }
-      GF.showInformationDialog("Berhasil", "Import data Berhasil");
-    }
-    // Replace data -> Hapus semua data lama, Menambahkan data baru
-    else if (importMode.value == "Replace") {
-      await expenseService.deleteAllData();
-      for (var i = 0; i < result.length; i++) {
-        await expenseService.insertData(Expense.fromList(result[i]).toMap());
-      }
-      GF.showInformationDialog("Berhasil", "Import data Berhasil");
-    }
-    // Update data -> Jika id sama maka update data
-    else if (importMode.value == "Update") {
-      for (var i = 0; i < result.length; i++) {
-        Expense expense = Expense.fromList(result[i]);
-        Expense? expenseData = await expenseService.fetchData(expense.id);
-        if (expenseData != null) {
-          await expenseService.updateData(expense.id, expense.toMap());
-        } else {
-          await expenseService.insertData(expense.toMap());
+      // Merge data -> Menambahkan data yang belum ada
+      else if (importMode.value == "Merge") {
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].length != Expense.props().length) {
+            continue;
+          }
+          // Import semua data yang belum ada
+          Expense expense = Expense.fromList(result[i]);
+          Expense? expenseData = await expenseService.fetchData(expense.id);
+          if (expenseData == null) {
+            await expenseService.insertData(expense.toMap());
+            counter++;
+          }
         }
       }
-      GF.showInformationDialog("Berhasil", "Import data Berhasil");
+      // Replace data -> Hapus semua data lama, Menambahkan data baru
+      else if (importMode.value == "Replace") {
+        await expenseService.deleteAllData();
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].length != Expense.props().length) {
+            continue;
+          }
+          await expenseService.insertData(Expense.fromList(result[i]).toMap());
+          counter++;
+        }
+      }
+      // Update data -> Jika id sama maka update data
+      else if (importMode.value == "Update") {
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].length != Expense.props().length) {
+            continue;
+          }
+          Expense expense = Expense.fromList(result[i]);
+          Expense? expenseData = await expenseService.fetchData(expense.id);
+          if (expenseData != null) {
+            await expenseService.updateData(expense.id, expense.toMap());
+          } else {
+            await expenseService.insertData(expense.toMap());
+          }
+          counter++;
+        }
+      }
+      if (counter > 0) {
+        GF.showInformationDialog(
+          "Berhasil",
+          "Import data Expense Berhasil ($counter dari ${result.length})",
+        );
+      } else {
+        GF.showInformationDialog("Gagal", "Tidak ada data yang diimport");
+      }
+    } catch (e) {
+      GF.showInformationDialog("Gagal", "Import data Expense gagal");
     }
   }
 
@@ -121,58 +146,83 @@ class SettingController extends ExpenseBaseController {
     final result = await Get.bottomSheet<List<List<dynamic>>?>(
       const ImportDialog(),
     );
-    if (result == null) {
-      return;
+    if (result == null || result.isEmpty) {
+      return GF.showInformationDialog("Peringatan", "Data tidak ditemukan");
     }
-    // Insert data -> Import sebagai data baru
-    if (importMode.value == "Insert") {
-      for (var i = 0; i < result.length; i++) {
-        // Import semua data yang belum ada
-        Budget budget = Budget.fromList(result[i]);
-        // Expense? expenseData = await dbService.fetchData(expense.id);
-        // if (expenseData == null) {
-        //   await dbService.insertData(expense.toMap());
-        // }
-        // // Import semua data sebagai data baru
-        budget.id = DateTime.now().toString();
-        await budgetService.insertDataBudget(budget.toMap());
-      }
-      GF.showInformationDialog("Berhasil", "Import data Berhasil");
-    }
-    // Merge data -> Menambahkan data yang belum ada
-    else if (importMode.value == "Merge") {
-      for (var i = 0; i < result.length; i++) {
-        // Import semua data yang belum ada
-        Budget budget = Budget.fromList(result[i]);
-        Budget? budgetData = await budgetService.fetchDataBudget(budget.id);
-        if (budgetData == null) {
+    try {
+      int counter = 0;
+      // Insert data -> Import sebagai data baru
+      if (importMode.value == "Insert") {
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].length != Budget.props().length) {
+            continue;
+          }
+          // Import semua data yang belum ada
+          Budget budget = Budget.fromList(result[i]);
+          // Expense? expenseData = await dbService.fetchData(expense.id);
+          // if (expenseData == null) {
+          //   await dbService.insertData(expense.toMap());
+          // }
+          // // Import semua data sebagai data baru
+          budget.id = DateTime.now().toString();
           await budgetService.insertDataBudget(budget.toMap());
+          counter++;
         }
       }
-      GF.showInformationDialog("Berhasil", "Import data Berhasil");
-    }
-    // Replace data -> Hapus semua data lama, Menambahkan data baru
-    else if (importMode.value == "Replace") {
-      await budgetService.deleteAllDataBudget();
-      for (var i = 0; i < result.length; i++) {
-        await budgetService.insertDataBudget(
-          Expense.fromList(result[i]).toMap(),
+      // Merge data -> Menambahkan data yang belum ada
+      else if (importMode.value == "Merge") {
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].length != Budget.props().length) {
+            continue;
+          }
+          // Import semua data yang belum ada
+          Budget budget = Budget.fromList(result[i]);
+          Budget? budgetData = await budgetService.fetchDataBudget(budget.id);
+          if (budgetData == null) {
+            await budgetService.insertDataBudget(budget.toMap());
+            counter++;
+          }
+        }
+      }
+      // Replace data -> Hapus semua data lama, Menambahkan data baru
+      else if (importMode.value == "Replace") {
+        await budgetService.deleteAllDataBudget();
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].length != Budget.props().length) {
+            continue;
+          }
+          await budgetService.insertDataBudget(
+            Expense.fromList(result[i]).toMap(),
+          );
+          counter++;
+        }
+      }
+      // Update data -> Jika id sama maka update data
+      else if (importMode.value == "Update") {
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].length != Budget.props().length) {
+            continue;
+          }
+          Budget budget = Budget.fromList(result[i]);
+          Budget? budgetData = await budgetService.fetchDataBudget(budget.id);
+          if (budgetData != null) {
+            await budgetService.updateDataBudget(budget.id, budget.toMap());
+          } else {
+            await budgetService.insertDataBudget(budget.toMap());
+          }
+          counter++;
+        }
+      }
+      if (counter > 0) {
+        GF.showInformationDialog(
+          "Berhasil",
+          "Import data Expense Berhasil ($counter dari ${result.length})",
         );
+      } else {
+        GF.showInformationDialog("Gagal", "Tidak ada data yang diimport");
       }
-      GF.showInformationDialog("Berhasil", "Import data Berhasil");
-    }
-    // Update data -> Jika id sama maka update data
-    else if (importMode.value == "Update") {
-      for (var i = 0; i < result.length; i++) {
-        Budget budget = Budget.fromList(result[i]);
-        Budget? budgetData = await budgetService.fetchDataBudget(budget.id);
-        if (budgetData != null) {
-          await budgetService.updateDataBudget(budget.id, budget.toMap());
-        } else {
-          await budgetService.insertDataBudget(budget.toMap());
-        }
-      }
-      GF.showInformationDialog("Berhasil", "Import data Berhasil");
+    } catch (e) {
+      GF.showInformationDialog("Gagal", "Import data Budget gagal");
     }
   }
 
