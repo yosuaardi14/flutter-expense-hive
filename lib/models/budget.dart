@@ -46,10 +46,11 @@ class Budget {
       id: list[0].toString(),
       month: int.parse(list[1].toString()),
       year: int.parse(list[2].toString()),
-      amount: double.tryParse(list[2].toString()) ?? 0,
-      type: list[3].toString(),
-      period: list[4].toString(),
-      param: list[5],
+      amount: double.tryParse(list[3].toString()) ?? 0.0,
+      type: list[4].toString(),
+      period: list[5].toString(),
+      param: int.parse(list[6].toString()),
+      parentid: list[7].toString() == "null" ? null : list[7],
       children: [],
     );
   }
@@ -79,7 +80,7 @@ class Budget {
   ];
 
   List<dynamic> toList() {
-    return [id, month, year, amount, type, period, param, parentid];
+    return [id, month, year, amount, type, period, param, parentid.toString()];
   }
 }
 

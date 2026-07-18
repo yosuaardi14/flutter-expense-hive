@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_expense_app/models/budget.dart';
 import 'package:flutter_expense_app/models/expense.dart';
 import 'package:flutter_expense_app/modules/base/controllers/expense_base_controller.dart';
 import 'package:flutter_expense_app/utils/csv_util.dart';
@@ -14,26 +15,18 @@ class SettingController extends ExpenseBaseController {
   final importMode = "Merge".obs;
 
   void exportToCSV() async {
-    listExpense.value = await dbService.fetchListData();
+    listExpense.value = await expenseService.fetchListData(reload: true);
     List<List<dynamic>> data = [...listExpense.map((e) => e.toList())];
-    CsvUtil.export(data);
-  }
-
-  void onClickImport() {
-    if (file.value?.bytes != null) {
-      Get.back(result: CsvUtil.import(file.value!.bytes!));
-    } else {
-      GF.showInformationDialog("Peringatan", "Anda belum memilih File");
-    }
+    CsvUtil.export(data, type: "EXPENSE");
   }
 
   void exportBudgetToCSV() async {
-    listBudget.value = await dbService.fetchListDataBudget();
+    listBudget.value = await budgetService.fetchListDataBudget(reload: true);
     List<List<dynamic>> data = [...listBudget.map((e) => e.toList())];
-    CsvUtil.export(data);
+    CsvUtil.export(data, type: "BUDGET");
   }
 
-  void onClickBudgetImport() {
+  void onClickImport() {
     if (file.value?.bytes != null) {
       Get.back(result: CsvUtil.import(file.value!.bytes!));
     } else {
@@ -84,7 +77,7 @@ class SettingController extends ExpenseBaseController {
         // }
         // // Import semua data sebagai data baru
         expense.id = DateTime.now().toString();
-        await dbService.insertData(expense.toMap());
+        await expenseService.insertData(expense.toMap());
       }
       GF.showInformationDialog("Berhasil", "Import data Berhasil");
     }
@@ -93,18 +86,18 @@ class SettingController extends ExpenseBaseController {
       for (var i = 0; i < result.length; i++) {
         // Import semua data yang belum ada
         Expense expense = Expense.fromList(result[i]);
-        Expense? expenseData = await dbService.fetchData(expense.id);
+        Expense? expenseData = await expenseService.fetchData(expense.id);
         if (expenseData == null) {
-          await dbService.insertData(expense.toMap());
+          await expenseService.insertData(expense.toMap());
         }
       }
       GF.showInformationDialog("Berhasil", "Import data Berhasil");
     }
     // Replace data -> Hapus semua data lama, Menambahkan data baru
     else if (importMode.value == "Replace") {
-      await dbService.deleteAllData();
+      await expenseService.deleteAllData();
       for (var i = 0; i < result.length; i++) {
-        await dbService.insertData(Expense.fromList(result[i]).toMap());
+        await expenseService.insertData(Expense.fromList(result[i]).toMap());
       }
       GF.showInformationDialog("Berhasil", "Import data Berhasil");
     }
@@ -112,11 +105,71 @@ class SettingController extends ExpenseBaseController {
     else if (importMode.value == "Update") {
       for (var i = 0; i < result.length; i++) {
         Expense expense = Expense.fromList(result[i]);
-        Expense? expenseData = await dbService.fetchData(expense.id);
+        Expense? expenseData = await expenseService.fetchData(expense.id);
         if (expenseData != null) {
-          await dbService.updateData(expense.id, expense.toMap());
+          await expenseService.updateData(expense.id, expense.toMap());
         } else {
-          await dbService.insertData(expense.toMap());
+          await expenseService.insertData(expense.toMap());
+        }
+      }
+      GF.showInformationDialog("Berhasil", "Import data Berhasil");
+    }
+  }
+
+  void importBudgetFromCSV() async {
+    resetForm();
+    final result = await Get.bottomSheet<List<List<dynamic>>?>(
+      const ImportDialog(),
+    );
+    if (result == null) {
+      return;
+    }
+    // Insert data -> Import sebagai data baru
+    if (importMode.value == "Insert") {
+      for (var i = 0; i < result.length; i++) {
+        // Import semua data yang belum ada
+        Budget budget = Budget.fromList(result[i]);
+        // Expense? expenseData = await dbService.fetchData(expense.id);
+        // if (expenseData == null) {
+        //   await dbService.insertData(expense.toMap());
+        // }
+        // // Import semua data sebagai data baru
+        budget.id = DateTime.now().toString();
+        await budgetService.insertDataBudget(budget.toMap());
+      }
+      GF.showInformationDialog("Berhasil", "Import data Berhasil");
+    }
+    // Merge data -> Menambahkan data yang belum ada
+    else if (importMode.value == "Merge") {
+      for (var i = 0; i < result.length; i++) {
+        // Import semua data yang belum ada
+        Budget budget = Budget.fromList(result[i]);
+        Budget? budgetData = await budgetService.fetchDataBudget(budget.id);
+        if (budgetData == null) {
+          await budgetService.insertDataBudget(budget.toMap());
+        }
+      }
+      GF.showInformationDialog("Berhasil", "Import data Berhasil");
+    }
+    // Replace data -> Hapus semua data lama, Menambahkan data baru
+    else if (importMode.value == "Replace") {
+      await budgetService.deleteAllDataBudget();
+      for (var i = 0; i < result.length; i++) {
+        await budgetService.insertDataBudget(
+          Expense.fromList(result[i]).toMap(),
+        );
+      }
+      GF.showInformationDialog("Berhasil", "Import data Berhasil");
+    }
+    // Update data -> Jika id sama maka update data
+    else if (importMode.value == "Update") {
+      for (var i = 0; i < result.length; i++) {
+        Budget budget = Budget.fromList(result[i]);
+        Budget? budgetData = await budgetService.fetchDataBudget(budget.id);
+        if (budgetData != null) {
+          await budgetService.updateDataBudget(budget.id, budget.toMap());
+        } else {
+          await budgetService.insertDataBudget(budget.toMap());
         }
       }
       GF.showInformationDialog("Berhasil", "Import data Berhasil");
@@ -128,7 +181,7 @@ class SettingController extends ExpenseBaseController {
       message: "Apakah Anda yakin ingin menghapus semua data Expense?",
     );
     if (result) {
-      await dbService.deleteAllData();
+      await expenseService.deleteAllData();
     }
   }
 
@@ -137,7 +190,7 @@ class SettingController extends ExpenseBaseController {
       message: "Apakah Anda yakin ingin menghapus semua data Budget?",
     );
     if (result) {
-      await dbService.deleteAllDataBudget();
+      await budgetService.deleteAllDataBudget();
     }
   }
 

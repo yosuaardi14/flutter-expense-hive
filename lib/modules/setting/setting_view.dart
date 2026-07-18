@@ -25,14 +25,14 @@ class SettingView extends GetView<SettingController> {
               Card(
                 child: ListTile(
                   trailing: const Icon(Icons.download, color: Colors.purple),
-                  title: const Text("Export CSV"),
+                  title: const Text("Export Expense CSV"),
                   onTap: controller.exportToCSV,
                 ),
               ),
               Card(
                 child: ListTile(
                   trailing: const Icon(Icons.upload, color: Colors.purple),
-                  title: const Text("Import CSV"),
+                  title: const Text("Import Expense CSV"),
                   onTap: controller.importFromCSV,
                 ),
               ),
@@ -41,6 +41,21 @@ class SettingView extends GetView<SettingController> {
                   trailing: const Icon(Icons.refresh, color: Colors.purple),
                   title: const Text("Reset Data Expense"),
                   onTap: controller.resetData,
+                ),
+              ),
+              const Divider(),
+              Card(
+                child: ListTile(
+                  trailing: const Icon(Icons.download, color: Colors.purple),
+                  title: const Text("Export Budget CSV"),
+                  onTap: controller.exportBudgetToCSV,
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  trailing: const Icon(Icons.upload, color: Colors.purple),
+                  title: const Text("Import Budget CSV"),
+                  onTap: controller.importBudgetFromCSV,
                 ),
               ),
               Card(
