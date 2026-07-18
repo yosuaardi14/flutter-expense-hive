@@ -31,8 +31,8 @@ class ExpenseAddController extends ExpenseBaseController {
         "date": selectedDate.toString(),
         "id": DateTime.now().toString(),
       };
-      await dbService.deleteData(id.value);
-      await dbService.insertData(data);
+      await expenseService.deleteData(id.value);
+      await expenseService.insertData(data);
       resetForm();
       update();
     } else {
@@ -44,14 +44,14 @@ class ExpenseAddController extends ExpenseBaseController {
         "date": selectedDate.toString(),
         "id": DateTime.now().toString(),
       };
-      await dbService.insertData(data);
+      await expenseService.insertData(data);
       resetForm();
       update();
     }
   }
 
   void detailData(String id) async {
-    Expense? data = await dbService.fetchData(id);
+    Expense? data = await expenseService.fetchData(id);
     if (data == null) {
       return;
     }
@@ -80,7 +80,7 @@ class ExpenseAddController extends ExpenseBaseController {
       "id": DateTime.now().toString(),
     };
     // await dbService.deleteData(id);
-    await dbService.updateData(id, data);
+    await expenseService.updateData(id, data);
     resetForm();
     update();
   }

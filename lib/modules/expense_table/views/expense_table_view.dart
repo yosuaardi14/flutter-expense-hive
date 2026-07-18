@@ -24,9 +24,17 @@ class ExpenseTableView extends GetView<ExpenseTableController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const BaseAppBar(
+      appBar: BaseAppBar(
         postFixtitleText: " - Table",
         centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              controller.listData();
+            },
+          ),
+        ],
       ),
       drawer: const BaseDrawer(),
       body: GetBuilder<ExpenseTableController>(
@@ -106,8 +114,7 @@ class ExpenseTableView extends GetView<ExpenseTableController> {
                               ),
                               onChanged: (val) {
                                 controller.year.value = val!;
-                                controller.calculateDayInMonth();
-                                controller.update();
+                                controller.listData();
                               },
                             ),
                           ),
@@ -128,8 +135,7 @@ class ExpenseTableView extends GetView<ExpenseTableController> {
                               ),
                               onChanged: (val) {
                                 controller.month.value = val!;
-                                controller.calculateDayInMonth();
-                                controller.update();
+                                controller.listData();
                               },
                             ),
                           ),

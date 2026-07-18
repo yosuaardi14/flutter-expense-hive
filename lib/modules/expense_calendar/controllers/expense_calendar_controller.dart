@@ -1,16 +1,11 @@
 import 'package:flutter_expense_app/modules/expense_detail/views/expense_detail_view.dart';
 import 'package:get/get.dart';
-// ignore: depend_on_referenced_packages
-import "package:collection/collection.dart";
-import 'package:intl/intl.dart';
 
 import '../../../models/expense.dart';
 import '../../../utils/constant.dart';
-import '../../../utils/global_functions.dart';
 import '../../base/controllers/expense_base_controller.dart';
 
 class ExpenseCalendarController extends ExpenseBaseController {
-  bool isLoading = false;
   final daysInMonth = 28.obs;
   final type = Constant.dropdownType[0].obs;
   final payment = Constant.dropdownPayment[0].obs;
@@ -18,9 +13,14 @@ class ExpenseCalendarController extends ExpenseBaseController {
   final sisaWeekDay = 0.obs;
   final mode = "Outcome".obs;
   final month = "0".obs;
-  final year = "2024".obs;
+  final year = "2025".obs;
   final listYear = <String>[].obs;
   final selectedPayment = [...Constant.dropdownPayment].obs;
+  final totalSpendMap = <String, double>{
+    "Bulan ini": 0.0,
+    "Bulan lalu": 0.0,
+    "Tahun ini": 0.0,
+  }.obs;
 
   @override
   void onInit() {
@@ -40,84 +40,39 @@ class ExpenseCalendarController extends ExpenseBaseController {
     update();
   }
 
-  String rupiahFormat(double amount) {
-    String postfix = "";
-    bool isInt = false;
-    if (amount > 999999999999) {
-      // formatted = (amount / 1000000000).toStringAsFixed(1)+"m";
-      postfix = "t";
-      isInt = amount % 1000000000000 == 0;
-      amount /= 1000000000000;
-    } else if (amount > 999999999) {
-      // formatted = (amount / 1000000000).toStringAsFixed(1)+"m";
-      postfix = "m";
-      isInt = amount % 1000000000 == 0;
-      amount /= 1000000000;
-    } else if (amount > 999999) {
-      // formatted = (amount / 1000000).toStringAsFixed(1)+"jt";
-      postfix = "jt";
-      isInt = amount % 1000000 == 0;
-      amount /= 1000000;
-    } else if (amount > 999) {
-      // formatted = (amount / 1000).toStringAsFixed(1)+"rb";
-      postfix = "rb";
-      isInt = amount % 1000 == 0;
-      amount /= 1000;
-    }
-    String formatted = NumberFormat.currency(
-      locale: "id",
-      decimalDigits: isInt ? 0 : 1,
-      symbol: "",
-    ).format(amount);
-    if (amount == 0) {
-      return "-";
-    }
-    return formatted + postfix;
-  }
-
   void listData() async {
-    isLoading = true;
-    update();
-    listExpense.value = await dbService.fetchListData();
-    if (mode.value == "Income") {
-      // if(payment.value != Constant.dropdownPayment[0]) {
-      //   listExpense.value =
-      //     listExpense.where((e) => (e.type == "Pemasukan") && (e.payment == payment.value)).toList();
-      // } else {
-      //   listExpense.value =
-      //     listExpense.where((e) => e.type == "Pemasukan").toList();
-      // }
-      listExpense.value = listExpense
-          .where(
-            (e) =>
-                (e.type == "Pemasukan") &&
-                selectedPayment.any((payment) => payment == e.payment),
-          )
-          .toList();
-    } else {
-      if (type.value != Constant.dropdownType[0]) {
-        listExpense.value = listExpense
-            .where(
-              (e) =>
-                  (e.type == type.value) &&
-                  selectedPayment.any((payment) => payment == e.payment),
-            )
-            .toList();
-      } else {
-        listExpense.value = listExpense
-            .where(
-              (e) =>
-                  (e.type != "Pemasukan") &&
-                  selectedPayment.any((payment) => payment == e.payment),
-            )
-            .toList();
-      }
-    }
+    showLoading();
+
+    listExpense.value = await expenseService.fetchListFilterData(
+      mode.value == "Outcome",
+      type.value != "Semua" && mode.value == "Outcome" ? type.value : null,
+      selectedPayment,
+      DateTime(int.parse(year.value), int.parse(month.value), 1),
+      DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
+    );
+
+    final now = DateTime.now();
+    totalSpendMap.value = {
+      "Bulan ini": await expenseService.sumRange(
+        mode.value == "Outcome",
+      DateTime(int.parse(year.value), int.parse(month.value), 1),
+      DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
+      ),
+      "Bulan lalu": await expenseService.sumRange(
+        mode.value == "Outcome",
+        DateTime(now.year, now.month - 1, 1),
+        DateTime(now.year, now.month, 1),
+      ),
+      "Tahun ini": await expenseService.sumRange(
+        mode.value == "Outcome",
+        DateTime(now.year, 1, 1),
+        DateTime(now.year + 1, 1, 1),
+      ),
+    };
 
     calculateDayInMonth();
-    _groupByDate(listExpense, expenseData);
-    isLoading = false;
-    update();
+    groupByDate(listExpense, expenseData);
+    hideLoading();
   }
 
   void calculateDayInMonth() {
@@ -132,71 +87,11 @@ class ExpenseCalendarController extends ExpenseBaseController {
     sisaWeekDay.value = (startWeekDay.value + daysInMonth.value) % 7;
   }
 
-  double totalSpend(int day) {
+  double totalSpendByDay(int day) {
     String dayStr = day.toString().padLeft(2, '0');
     List<Expense>? data =
         expenseData["$dayStr-${month.value.padLeft(2, '0')}-${year.value}"];
     return calcTotalSpending(data);
-    // if (data == null) return 0;
-    // return data.fold(0.0, (sum, item) => sum + item.amount);
-  }
-
-  void _groupByDate(RxList<Expense> list, RxMap<String, dynamic> data) {
-    Map<String, dynamic> newMap =
-        groupBy(
-          list,
-          (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date),
-        ).map((k, v) {
-          return MapEntry(
-            k,
-            v.map((item) {
-              return item;
-            }).toList(),
-          );
-        });
-    Map<String, dynamic> sortedByKeyMap = Map.fromEntries(
-      newMap.entries.toList()..sort(
-        (e1, e2) =>
-            GF.stringToDateTime(e2.key).compareTo(GF.stringToDateTime(e1.key)),
-      ),
-    );
-    data.value = sortedByKeyMap;
-  }
-
-  Map<String, dynamic> totalSpending() {
-    final DateTime now = DateTime(
-      int.parse(year.value),
-      int.parse(month.value),
-    );
-    List<Expense> yearExpense = listExpense
-        .where((element) => element.date.year == now.year)
-        .toList();
-
-    List<Expense> lastMonthExpense = listExpense
-        .where(
-          (element) =>
-              element.date.month == now.month - 1 &&
-              element.date.year == now.year,
-        )
-        .toList();
-
-    List<Expense> monthExpense = listExpense
-        .where(
-          (element) =>
-              element.date.month == now.month && element.date.year == now.year,
-        )
-        .toList();
-
-    return {
-      "Bulan ini": calcTotalSpending(monthExpense),
-      "Bulan lalu": calcTotalSpending(lastMonthExpense),
-      "Tahun ini": calcTotalSpending(yearExpense),
-    };
-  }
-
-  double calcTotalSpending(List<Expense>? data) {
-    if (data == null) return 0;
-    return data.fold(0.0, (sum, item) => sum + item.amount);
   }
 
   void showDetail(int day) {

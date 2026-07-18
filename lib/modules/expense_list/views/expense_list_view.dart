@@ -53,7 +53,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(date),
-            Text(rupiahFormat(controller.totalSpend(data))),
+            Text(rupiahFormat(controller.calcTotalSpending(data))),
             // Chip(label: Text(rupiahFormat(controller.sumTotalperDay(data)))),
           ],
         ),
@@ -267,7 +267,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
         child: GetBuilder<ExpenseListController>(
           builder: (c) => Column(
             children: controller
-                .totalSpending()
+                .totalSpendMap()
                 .entries
                 .where((x) => x.key != "List")
                 .map(
@@ -470,14 +470,20 @@ class ExpenseListView extends GetView<ExpenseListController> {
           ),
         ),
         centerTitle: false,
-        // actions: [
-        //   IconButton(
-        //     onPressed: () {
-        //       controller.switchList();
-        //     },
-        //     icon: const Icon(Icons.currency_exchange),
-        //   ),
-        // ],
+        actions: [
+          //   IconButton(
+          //     onPressed: () {
+          //       controller.switchList();
+          //     },
+          //     icon: const Icon(Icons.currency_exchange),
+          //   ),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              controller.listData();
+            },
+          ),
+        ],
       ),
       drawer: const BaseDrawer(),
       floatingActionButton: FloatingActionButton(
@@ -525,9 +531,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
                             DropdownMenuItem<String>(value: e, child: Text(e)),
                       ),
                     ],
-                    decoration: InputDecoration(
-                      labelText: 'Jenis',
-                    ),
+                    decoration: InputDecoration(labelText: 'Jenis'),
                     onChanged: (val) {
                       controller.switchList();
                     },
@@ -745,7 +749,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
               ),
               Text(
                 GF.rupiahFormat(
-                  controller.totalSpending()["List"],
+                  controller.totalSpendMap()["List"] ?? 0.0,
                   symbol: "Rp",
                 ),
               ),

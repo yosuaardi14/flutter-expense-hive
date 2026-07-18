@@ -15,9 +15,17 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const BaseAppBar(
+      appBar: BaseAppBar(
         postFixtitleText: " - Calendar",
         centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              controller.listData();
+            },
+          ),
+        ],
       ),
       drawer: const BaseDrawer(),
       body: GetBuilder<ExpenseCalendarController>(
@@ -170,8 +178,8 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                               ),
                               onChanged: (val) {
                                 controller.year.value = val!;
-                                controller.calculateDayInMonth();
                                 controller.update();
+                                controller.listData();
                               },
                             ),
                           ),
@@ -192,8 +200,8 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                               ),
                               onChanged: (val) {
                                 controller.month.value = val!;
-                                controller.calculateDayInMonth();
                                 controller.update();
+                                controller.listData();
                               },
                             ),
                           ),
@@ -254,12 +262,12 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          "Total Bulan ini: ",
+                          "Total : ",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
                           GF.rupiahFormat(
-                            controller.totalSpending()["Bulan ini"],
+                            controller.totalSpendMap()["Bulan ini"] ?? 0.0,
                             symbol: "Rp",
                           ),
                         ),
@@ -327,7 +335,8 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                       final size = MediaQuery.sizeOf(context);
                       return GridView.extent(
                         maxCrossAxisExtent: size.width / 7,
-                        childAspectRatio: (size.width / 7) / min(size.width / 7, 75),
+                        childAspectRatio:
+                            (size.width / 7) / min(size.width / 7, 75),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 5,
                           vertical: 1,
@@ -347,7 +356,7 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                           ...List.generate(controller.daysInMonth.value, (
                             index,
                           ) {
-                            double totalSpend = controller.totalSpend(
+                            double totalSpend = controller.totalSpendByDay(
                               index + 1,
                             );
                             return InkWell(
@@ -376,7 +385,7 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                                     ),
                                     FittedBox(
                                       child: Text(
-                                        controller.rupiahFormat(totalSpend),
+                                        GF.rupiahFormatPostfix(totalSpend),
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                     ),
