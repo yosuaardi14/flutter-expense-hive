@@ -16,7 +16,18 @@ class BudgetListView extends GetView<BudgetListController> {
     return RefreshIndicator(
       onRefresh: () async => controller.listData(),
       child: Scaffold(
-        appBar: BaseAppBar(titleText: "Budget App - List", centerTitle: false),
+        appBar: BaseAppBar(
+          titleText: "Budget App - List",
+          centerTitle: false,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: () {
+                controller.listData();
+              },
+            ),
+          ],
+        ),
         drawer: const BaseDrawer(),
         // floatingActionButton: FloatingActionButton(
         //   onPressed: controller.addBudget,
@@ -27,9 +38,7 @@ class BudgetListView extends GetView<BudgetListController> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              child: 
-              
-              Row(
+              child: Row(
                 children: [
                   Expanded(
                     child: Obx(
@@ -46,8 +55,8 @@ class BudgetListView extends GetView<BudgetListController> {
                         decoration: const InputDecoration(labelText: 'Tahun'),
                         onChanged: (val) {
                           controller.year.value = val!;
-                          controller.getCurrentListBudget();
                           controller.update();
+                          controller.listData();
                         },
                       ),
                     ),
@@ -68,8 +77,8 @@ class BudgetListView extends GetView<BudgetListController> {
                         decoration: const InputDecoration(labelText: 'Bulan'),
                         onChanged: (val) {
                           controller.month.value = val!;
-                          controller.getCurrentListBudget();
                           controller.update();
+                          controller.listData();
                         },
                       ),
                     ),
@@ -141,43 +150,31 @@ class BudgetListView extends GetView<BudgetListController> {
                               controller.editBudget(budget);
                             },
                           ),
-                          ...controller.listBudget
-                              .where(
-                                (e) =>
-                                    e.parentid == budget.id &&
-                                    e.month.toString() ==
-                                        controller.month.value &&
-                                    e.year.toString() ==
-                                        controller.year.value &&
-                                    e.type == Constant.dropdownTypeOnly[index],
-                              )
-                              .map((e) {
-                                return ListTile(
-                                  title: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        e.period == "Per Hari"
-                                            ? Constant.hari[e.param - 1]
-                                            : "Minggu ${e.param}",
-                                      ),
-                                      Text(
-                                        GF.rupiahFormat(e.amount, symbol: "Rp"),
-                                      ),
-                                    ],
+                          ...budget.children.map((e) {
+                            return ListTile(
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    e.period == "Per Hari"
+                                        ? Constant.hari[e.param - 1]
+                                        : "Minggu ${e.param}",
                                   ),
-                                  trailing: IconButton(
-                                    onPressed: () {
-                                      controller.deleteBudget(e);
-                                    },
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                  ),
-                                  onTap: () {
-                                    controller.editBudget(e);
-                                  },
-                                );
-                              }),
+                                  Text(GF.rupiahFormat(e.amount, symbol: "Rp")),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                onPressed: () {
+                                  controller.deleteBudget(e);
+                                },
+                                icon: Icon(Icons.delete, color: Colors.red),
+                              ),
+                              onTap: () {
+                                controller.editBudget(e);
+                              },
+                            );
+                          }),
                         ],
                       ),
                     );

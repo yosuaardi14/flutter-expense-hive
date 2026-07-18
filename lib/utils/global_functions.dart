@@ -89,6 +89,41 @@ class GF {
     ).format(amount);
   }
 
+  static String rupiahFormatPostfix(double amount) {
+    String postfix = "";
+    bool isInt = false;
+    if (amount > 999999999999) {
+      // formatted = (amount / 1000000000).toStringAsFixed(1)+"m";
+      postfix = "t";
+      isInt = amount % 1000000000000 == 0;
+      amount /= 1000000000000;
+    } else if (amount > 999999999) {
+      // formatted = (amount / 1000000000).toStringAsFixed(1)+"m";
+      postfix = "m";
+      isInt = amount % 1000000000 == 0;
+      amount /= 1000000000;
+    } else if (amount > 999999) {
+      // formatted = (amount / 1000000).toStringAsFixed(1)+"jt";
+      postfix = "jt";
+      isInt = amount % 1000000 == 0;
+      amount /= 1000000;
+    } else if (amount > 999) {
+      // formatted = (amount / 1000).toStringAsFixed(1)+"rb";
+      postfix = "rb";
+      isInt = amount % 1000 == 0;
+      amount /= 1000;
+    }
+    String formatted = NumberFormat.currency(
+      locale: "id",
+      decimalDigits: isInt ? 0 : 1,
+      symbol: "",
+    ).format(amount);
+    if (amount == 0) {
+      return "-";
+    }
+    return formatted + postfix;
+  }
+
   static String dateFormatString(DateTime date, {bool showWeekday = false}) {
     String dateOnlyString =
         "${date.day} ${Constant.dropdownMonth[date.month.toString()]} ${date.year}";

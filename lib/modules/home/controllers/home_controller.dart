@@ -23,8 +23,8 @@ class HomeController extends ExpenseBaseController {
   }
 
   void listData() async {
-    listExpense.value = await dbService.fetchListData();
-    listBudget.value = await dbService.fetchListDataBudget();
+    listExpense.value = await expenseService.fetchListData();
+    listBudget.value = await budgetService.fetchListDataBudget();
     total["Income"] = totalExpensePerMonth(false);
     total["Expense"] = totalExpensePerMonth(true);
     total["Budget"] = totalBudgetPerMonth();

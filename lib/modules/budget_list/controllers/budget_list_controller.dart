@@ -24,27 +24,23 @@ class BudgetListController extends ExpenseBaseController {
     listData();
   }
 
-  void listData() async {
-    listBudget.value = await dbService.fetchListDataBudget();
-    update();
-    getCurrentListBudget();
-  }
-
-  void getCurrentListBudget() {
-    currentListBudget.value = listBudget
-        .where(
-          (e) =>
-              e.parentid == null &&
-              e.month.toString() == month.value &&
-              e.year.toString() == year.value,
-        )
-        .toList();
-    update();
-  }
-
   @override
   void onReady() {
     update();
+  }
+
+  void listData() async {
+    showLoading();
+
+    currentListBudget.value = await budgetService.fetchListFilterDataBudget(
+      null,
+      null,
+      int.tryParse(month.value),
+      int.tryParse(year.value),
+    );
+    update();
+
+    hideLoading();
   }
 
   void addBudget({String? category}) {
@@ -69,14 +65,14 @@ class BudgetListController extends ExpenseBaseController {
 
   void deleteBudget(Budget budget) async {
     if (budget.parentid == null) {
-      List<Budget> children = await dbService.fetchListDataBudgetByParentId(
+      List<Budget> children = await budgetService.fetchListDataBudgetByParentId(
         budget.id,
       );
       for (Budget child in children) {
-        await dbService.deleteDataBudget(child.id);
+        await budgetService.deleteDataBudget(child.id);
       }
     }
-    await dbService.deleteDataBudget(budget.id);
+    await budgetService.deleteDataBudget(budget.id);
     listData();
   }
 }

@@ -20,8 +20,8 @@ class HiveExpenseService extends GetxService implements ExpenseCrudService {
   }
 
   @override
-  Future<List<Expense>> fetchListData() async {
-    if (_master.isEmpty) {
+  Future<List<Expense>> fetchListData({bool reload = false}) async {
+    if (_master.isEmpty || reload) {
       await load();
     }
 

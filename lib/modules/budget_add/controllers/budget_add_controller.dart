@@ -86,10 +86,10 @@ class BudgetAddController extends ExpenseBaseController {
         "parentid": null,
         "id": parentid,
       };
-      await dbService.updateDataBudget(id.value, data);
+      await budgetService.updateDataBudget(id.value, data);
       if (childrenBudget.isNotEmpty) {
         for (var i = 0; i < childrenBudget.length; i++) {
-          await dbService.deleteDataBudget(childrenBudget[i].id);
+          await budgetService.deleteDataBudget(childrenBudget[i].id);
         }
       }
       if (period.value == "Per Hari") {
@@ -110,7 +110,7 @@ class BudgetAddController extends ExpenseBaseController {
             "parentid": parentid,
             "id": elementId,
           };
-          await dbService.insertDataBudget(childData);
+          await budgetService.insertDataBudget(childData);
         }
       } else if (period.value == "Per Minggu") {
         for (var i = 0; i < weekList.length; i++) {
@@ -128,7 +128,7 @@ class BudgetAddController extends ExpenseBaseController {
               "parentid": parentid,
               "id": elementId,
             };
-            await dbService.insertDataBudget(childData);
+            await budgetService.insertDataBudget(childData);
           }
         }
       }
@@ -146,7 +146,7 @@ class BudgetAddController extends ExpenseBaseController {
         "parentid": null,
         "id": parentid,
       };
-      await dbService.insertDataBudget(data);
+      await budgetService.insertDataBudget(data);
       if (period.value == "Per Hari") {
         for (var i = 0; i < dayAmounts.length; i++) {
           MapEntry<int, String?> entry = dayAmounts.entries.elementAt(i);
@@ -165,7 +165,7 @@ class BudgetAddController extends ExpenseBaseController {
             "parentid": parentid,
             "id": elementId,
           };
-          await dbService.insertDataBudget(childData);
+          await budgetService.insertDataBudget(childData);
         }
       } else if (period.value == "Per Minggu") {
         for (var i = 0; i < weekList.length; i++) {
@@ -183,7 +183,7 @@ class BudgetAddController extends ExpenseBaseController {
               "parentid": parentid,
               "id": elementId,
             };
-            await dbService.insertDataBudget(childData);
+            await budgetService.insertDataBudget(childData);
           }
         }
       }
@@ -193,7 +193,7 @@ class BudgetAddController extends ExpenseBaseController {
   }
 
   void detailData(String id) async {
-    Budget? data = await dbService.fetchDataBudget(id, withChildren: true);
+    Budget? data = await budgetService.fetchDataBudget(id, withChildren: true);
     if (data == null) {
       return;
     }
