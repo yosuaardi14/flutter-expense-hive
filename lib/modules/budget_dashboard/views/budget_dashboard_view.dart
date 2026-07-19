@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expense_app/models/budget.dart';
 import 'package:flutter_expense_app/modules/base/widgets/base_drawer.dart';
-import 'package:flutter_expense_app/modules/base/widgets/day_widget.dart';
+// import 'package:flutter_expense_app/modules/base/widgets/day_widget.dart';
 // import 'package:flutter_expense_app/modules/base/widgets/month_picker_dialog.dart';
 import 'package:flutter_expense_app/modules/budget_dashboard/controllers/budget_dashboard_controller.dart';
 import 'package:flutter_expense_app/utils/constant.dart';
@@ -26,6 +26,14 @@ class BudgetDashboardView extends GetView<BudgetDashboardController> {
             appBar: BaseAppBar(
               titleText: "Budget App - Dashboard",
               centerTitle: false,
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.refresh),
+                  onPressed: () {
+                    controller.listData();
+                  },
+                ),
+              ],
             ),
             drawer: const BaseDrawer(),
             body: Column(
@@ -121,10 +129,8 @@ class BudgetDashboardView extends GetView<BudgetDashboardController> {
                               ),
                               onChanged: (val) {
                                 controller.year.value = val!;
-                                controller.onChangeTab(
-                                  controller.tabIndex.value,
-                                );
                                 controller.update();
+                                controller.listData();
                               },
                             ),
                           ),
@@ -147,10 +153,8 @@ class BudgetDashboardView extends GetView<BudgetDashboardController> {
                               ),
                               onChanged: (val) {
                                 controller.month.value = val!;
-                                controller.onChangeTab(
-                                  controller.tabIndex.value,
-                                );
                                 controller.update();
+                                controller.listData();
                               },
                             ),
                           ),
@@ -253,14 +257,14 @@ class BudgetDashboardView extends GetView<BudgetDashboardController> {
                       ),
                       child: Column(
                         children: [
-                          DayWidget(
-                            selectedDate: DateTime.parse(
-                              "${controller.year.value}-${controller.month.value.padLeft(2, "0")}-01",
-                            ),
-                            weekIndex:
-                                int.tryParse(controller.selectedWeek.value) ??
-                                1,
-                          ),
+                          // DayWidget(
+                          //   selectedDate: DateTime.parse(
+                          //     "${controller.year.value}-${controller.month.value.padLeft(2, "0")}-01",
+                          //   ),
+                          //   weekIndex:
+                          //       int.tryParse(controller.selectedWeek.value) ??
+                          //       1,
+                          // ),
                           if (controller.periodIndex.first == 0)
                             Row(
                               spacing: 3,
@@ -339,12 +343,10 @@ class BudgetDashboardView extends GetView<BudgetDashboardController> {
                                       if (res != null) {
                                         controller.selectedDay.value = res.day
                                             .toString();
-                                        controller.onChangeTab(
-                                          controller.tabIndex.value,
-                                        );
                                         controller.update();
                                         controller.dayController.text =
                                             "${controller.selectedDay.value} ${Constant.dropdownMonthOnly[controller.month.value]} ${controller.year.value}";
+                                        controller.listData();
                                       }
                                     },
                                     decoration: const InputDecoration(
@@ -404,10 +406,8 @@ class BudgetDashboardView extends GetView<BudgetDashboardController> {
                                       ),
                                       onChanged: (val) {
                                         controller.selectedWeek.value = val!;
-                                        controller.onChangeTab(
-                                          controller.tabIndex.value,
-                                        );
                                         controller.update();
+                                        controller.listData();
                                       },
                                     ),
                                   ),

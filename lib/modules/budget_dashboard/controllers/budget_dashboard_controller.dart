@@ -54,23 +54,16 @@ class BudgetDashboardController extends ExpenseBaseController {
     listData();
   }
 
-  void listData() async {
-    listBudget.value = await dbService.fetchListDataBudget();
-    listExpense.value = await dbService.fetchListData();
-
-    dayController.text =
-        "${selectedDay.value} ${Constant.dropdownMonthOnly[month.value]} ${year.value}";
-    if (tabIndex.value == 0) {
-      calculateTotalBudget(selectedDate: DateUtils.dateOnly(DateTime.now()));
-      getCurrentPeriodListBudgetExpense(
-        selectedDate: DateUtils.dateOnly(DateTime.now()),
-      );
-    } else {
-      onChangeTab(1);
-    }
+  @override
+  void onReady() {
+    update();
   }
 
-  void onChangeTab(int value) {
+  void listData() async {
+    onChangeTab(tabIndex.value);
+  }
+
+  void onChangeTab(int value) async {
     tabIndex(value);
     update();
     DateTime? selectedDate;
@@ -116,6 +109,19 @@ class BudgetDashboardController extends ExpenseBaseController {
       month.value = now.month.toString();
       year.value = now.year.toString();
     }
+    listBudget.value = await budgetService.fetchListFilterDataBudget(
+      null,
+      null,
+      int.tryParse(month.value),
+      int.tryParse(year.value),
+    );
+    listExpense.value = await expenseService.fetchListFilterData(
+      true,
+      null,
+      null,
+      DateTime(int.parse(year.value), int.parse(month.value), 1),
+      DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
+    );
     dayController.text =
         "${selectedDay.value} ${Constant.dropdownMonthOnly[month.value]} ${year.value}";
     calculateTotalBudget(selectedDate: selectedDate);
@@ -127,14 +133,7 @@ class BudgetDashboardController extends ExpenseBaseController {
 
   void calculateTotalBudget({DateTime? selectedDate}) {
     totalExpense.value = totalSpend(getMonthExpenses(selected: selectedDate));
-    List<Budget> monthBudget = listBudget
-        .where(
-          (element) =>
-              element.parentid == null &&
-              element.month.toString() == month.value &&
-              element.year.toString() == year.value,
-        )
-        .toList();
+    List<Budget> monthBudget = listBudget;
 
     List<Budget> currentMonthBudget = [
       ...convertDailyAsMonthBudget(monthBudget, selectedDate),
@@ -163,9 +162,6 @@ class BudgetDashboardController extends ExpenseBaseController {
           (element) => element.parentid == null && element.period == "Per Hari",
         )
         .map((e) {
-          List<Budget> children = listBudget
-              .where((child) => child.parentid == e.id)
-              .toList();
           Budget budget = Budget(
             id: e.id,
             month: e.month,
@@ -174,13 +170,10 @@ class BudgetDashboardController extends ExpenseBaseController {
             period: e.period,
             amount: e.amount,
             param: e.param,
-            children: children,
+            children: e.children,
             totalExpense: 0,
             percentage: 0,
           );
-          // budget.amount = calculateDailyToWeekly(budget);
-          // budget.children = [];
-          // budget.amount = calculateWeeklyToMonthly(budget);
           budget.amount = calculateDailyToMonthly(
             budget,
             selectedDate: selectedDate,
@@ -198,9 +191,6 @@ class BudgetDashboardController extends ExpenseBaseController {
               element.parentid == null && element.period == "Per Minggu",
         )
         .map((e) {
-          List<Budget> children = listBudget
-              .where((child) => child.parentid == e.id)
-              .toList();
           Budget budget = Budget(
             id: e.id,
             month: e.month,
@@ -209,7 +199,7 @@ class BudgetDashboardController extends ExpenseBaseController {
             period: e.period,
             amount: e.amount,
             param: e.param,
-            children: children,
+            children: e.children,
             totalExpense: 0,
             percentage: 0,
           );
@@ -227,18 +217,16 @@ class BudgetDashboardController extends ExpenseBaseController {
     currentListBudget.value = listBudget
         .where(
           (element) =>
-              element.parentid == null &&
+              // element.parentid == null &&
               Constant.dropdownBudgetPeriod.reversed
                   .toList()
                   .sublist(2 - periodIndex.first)
-                  .contains(element.period) &&
-              element.month.toString() == month.value &&
-              element.year.toString() == year.value,
+                  .contains(element.period),
+          // &&
+          // element.month.toString() == month.value &&
+          // element.year.toString() == year.value,
         )
         .map((e) {
-          List<Budget> children = listBudget
-              .where((child) => child.parentid == e.id)
-              .toList();
           Budget budget = Budget(
             id: e.id,
             month: e.month,
@@ -247,7 +235,7 @@ class BudgetDashboardController extends ExpenseBaseController {
             period: e.period,
             amount: e.amount,
             param: e.param,
-            children: children,
+            children: e.children,
             totalExpense: 0,
             percentage: 0,
           );
@@ -258,9 +246,6 @@ class BudgetDashboardController extends ExpenseBaseController {
             if (e.period == "Per Minggu") {
               budget.amount = calculateWeeklyToMonthly(budget);
             } else if (e.period == "Per Hari") {
-              // budget.amount = calculateDailyToWeekly(budget);
-              // budget.children = [];
-              // budget.amount = calculateWeeklyToMonthly(budget);
               budget.amount = calculateDailyToMonthly(
                 budget,
                 selectedDate: selectedDate,
@@ -281,7 +266,7 @@ class BudgetDashboardController extends ExpenseBaseController {
               );
             } else {
               budget.amount =
-                  children
+                  budget.children
                       .firstWhereOrNull(
                         (e) => e.param == (currentWeek ?? getCurrentWeek()),
                       )
@@ -293,7 +278,7 @@ class BudgetDashboardController extends ExpenseBaseController {
           }
           if (Constant.dropdownBudgetPeriod[periodIndex.first] == "Per Hari") {
             budget.amount =
-                children
+                budget.children
                     .firstWhereOrNull(
                       (e) => e.param.toString() == weekday.value,
                     )
@@ -464,13 +449,6 @@ class BudgetDashboardController extends ExpenseBaseController {
   }
 
   int totalDaysInMonth(DateTime now) {
-    // int selectedMonth = int.tryParse(month.value) ?? now.month;
-    // int selectedYear = int.tryParse(year.value) ?? now.year;
-
-    // DateTime selected = DateTime(selectedYear, selectedMonth, 1);
-    // DateTime after = DateTime(selectedYear, selectedMonth + 1, 1);
-    // DateTime selectedLastDay = after.subtract(Duration(days: 1));
-    // return selectedLastDay.difference(selected).inDays + 1;
     final selectedMonth = int.tryParse(month.value) ?? now.month;
     final selectedYear = int.tryParse(year.value) ?? now.year;
     return DateTime(selectedYear, selectedMonth + 1, 0).day;
@@ -498,10 +476,10 @@ class BudgetDashboardController extends ExpenseBaseController {
     DateTime now = DateUtils.dateOnly(selected ?? DateTime.now());
     return listExpense.where((tx) {
       return (type != null ? tx.type == type : true) &&
-          tx.type != "Pemasukan" &&
-          tx.date.day == now.day &&
-          tx.date.month == now.month &&
-          tx.date.year == now.year;
+          // tx.type != "Pemasukan" &&
+          tx.date.day == now.day;
+      // tx.date.month == now.month &&
+      // tx.date.year == now.year
     }).toList();
   }
 
@@ -513,26 +491,22 @@ class BudgetDashboardController extends ExpenseBaseController {
         .subtract(Duration(microseconds: 1));
     return listExpense.where((tx) {
       return (type != null ? tx.type == type : true) &&
-          tx.type != "Pemasukan" &&
+          // tx.type != "Pemasukan" &&
           tx.date.isAfter(startOfWeek) &&
-          tx.date.isBefore(endOfWeek) &&
-          tx.date.month == now.month;
+          tx.date.isBefore(endOfWeek);
+      //  &&
+      // tx.date.month == now.month;
     }).toList();
   }
 
   List<Expense> getMonthExpenses({String? type, DateTime? selected}) {
-    DateTime now = DateUtils.dateOnly(selected ?? DateTime.now());
+    // DateTime now = DateUtils.dateOnly(selected ?? DateTime.now());
     return listExpense.where((tx) {
-      return (type != null ? tx.type == type : true) &&
-          tx.type != "Pemasukan" &&
-          tx.date.month == now.month &&
-          tx.date.year == now.year;
+      return (type != null ? tx.type == type : true); //&&
+      // tx.type != "Pemasukan" &&
+      // tx.date.month == now.month &&
+      // tx.date.year == now.year;
     }).toList();
-  }
-
-  @override
-  void onReady() {
-    update();
   }
 
   void onChangePeriod(Set<int> val) {
