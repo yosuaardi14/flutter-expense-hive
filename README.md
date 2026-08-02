@@ -4,9 +4,6 @@ A new Flutter project.
 - State Management: GetX
 - Database: Hive (Default) / SQLite
 
-## Notes
-- If you want using SQLITE just uncomment the DBService in lib/modules/base/controllers/expense_base_controller.dart and comment the HiveService (Default Hive)
-
 ## Getting Started
 
 This project is a starting point for a Flutter application.
