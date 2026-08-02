@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expense_app/modules/base/widgets/base_drawer.dart';
 import 'package:get/get.dart';
 
 import '../base/widgets/base_app_bar.dart' show BaseAppBar;
@@ -11,9 +12,11 @@ class SettingView extends GetView<SettingController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const BaseAppBar(
-        postFixtitleText: " - Setting",
+        titleText: "Setting",
+        // postFixtitleText: " - Setting",
         centerTitle: false,
       ),
+      drawer: const BaseDrawer(),
       body: GetBuilder(
         init: controller,
         builder: (controller) {
@@ -22,22 +25,44 @@ class SettingView extends GetView<SettingController> {
               Card(
                 child: ListTile(
                   trailing: const Icon(Icons.download, color: Colors.purple),
-                  title: const Text("Export CSV"),
+                  title: const Text("Export Expense CSV"),
                   onTap: controller.exportToCSV,
                 ),
               ),
               Card(
                 child: ListTile(
                   trailing: const Icon(Icons.upload, color: Colors.purple),
-                  title: const Text("Import CSV"),
+                  title: const Text("Import Expense CSV"),
                   onTap: controller.importFromCSV,
                 ),
               ),
               Card(
                 child: ListTile(
                   trailing: const Icon(Icons.refresh, color: Colors.purple),
-                  title: const Text("Reset Data"),
+                  title: const Text("Reset Data Expense"),
                   onTap: controller.resetData,
+                ),
+              ),
+              const Divider(),
+              Card(
+                child: ListTile(
+                  trailing: const Icon(Icons.download, color: Colors.purple),
+                  title: const Text("Export Budget CSV"),
+                  onTap: controller.exportBudgetToCSV,
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  trailing: const Icon(Icons.upload, color: Colors.purple),
+                  title: const Text("Import Budget CSV"),
+                  onTap: controller.importBudgetFromCSV,
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  trailing: const Icon(Icons.refresh, color: Colors.purple),
+                  title: const Text("Reset Data Budget"),
+                  onTap: controller.resetDataBudget,
                 ),
               ),
             ],

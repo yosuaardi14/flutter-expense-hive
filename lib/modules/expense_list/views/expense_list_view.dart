@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expense_app/models/expense.dart';
+import 'package:flutter_expense_app/modules/base/widgets/base_app_bar.dart';
 import 'package:flutter_expense_app/modules/expense_add/controllers/expense_add_controller.dart';
 import 'package:flutter_expense_app/modules/expense_add/views/expense_add_view.dart';
 import 'package:flutter_expense_app/utils/global_functions.dart';
@@ -8,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../utils/constant.dart';
+import '../../base/widgets/base_drawer.dart';
 import '../controllers/expense_list_controller.dart';
 
 class ExpenseListView extends GetView<ExpenseListController> {
@@ -51,7 +53,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(date),
-            Text(rupiahFormat(controller.totalSpend(data))),
+            Text(rupiahFormat(controller.calcTotalSpending(data))),
             // Chip(label: Text(rupiahFormat(controller.sumTotalperDay(data)))),
           ],
         ),
@@ -265,7 +267,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
         child: GetBuilder<ExpenseListController>(
           builder: (c) => Column(
             children: controller
-                .totalSpending()
+                .totalSpendMap()
                 .entries
                 .where((x) => x.key != "List")
                 .map(
@@ -461,23 +463,29 @@ class ExpenseListView extends GetView<ExpenseListController> {
     // );
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: BaseAppBar(
         title: Obx(
           () => Text(
-            'Expense App - ${controller.isExpense.value ? "Outcome" : "Income"}',
+            'Expense - ${controller.isExpense.value ? "Outcome" : "Income"}',
           ),
         ),
         centerTitle: false,
         actions: [
+          //   IconButton(
+          //     onPressed: () {
+          //       controller.switchList();
+          //     },
+          //     icon: const Icon(Icons.currency_exchange),
+          //   ),
           IconButton(
+            icon: Icon(Icons.refresh),
             onPressed: () {
-              controller.switchList();
+              controller.listData();
             },
-            icon: const Icon(Icons.currency_exchange),
           ),
         ],
       ),
-      // drawer: const BaseDrawer(),
+      drawer: const BaseDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: addExpense,
         child: const Icon(Icons.add),
@@ -506,98 +514,227 @@ class ExpenseListView extends GetView<ExpenseListController> {
   List<Widget> filter() {
     return [
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
-        child: Row(
-          spacing: 10,
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        child: Column(
           children: [
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                initialValue: controller.isExpense.value
-                    ? controller.filterValue["payment"]
-                    : controller.filterValue["source"],
-                items: [
-                  ...Constant.dropdownPayment.map(
-                    (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: controller.isExpense.value
+                        ? Constant.mode.first
+                        : Constant.mode.last,
+                    items: [
+                      ...Constant.mode.map(
+                        (e) =>
+                            DropdownMenuItem<String>(value: e, child: Text(e)),
+                      ),
+                    ],
+                    decoration: InputDecoration(labelText: 'Jenis'),
+                    onChanged: (val) {
+                      controller.switchList();
+                    },
                   ),
-                ],
-                decoration: InputDecoration(
-                  labelText: controller.isExpense.value
-                      ? 'Pembayaran'
-                      : 'Sumber',
                 ),
-                onChanged: (val) {
-                  controller.filterValue[controller.isExpense.value
-                          ? "payment"
-                          : "source"] =
-                      val!;
-                  controller.update();
-                  controller.filterData(controller.filterValue());
-                },
-              ),
-            ),
-            if (controller.isExpense.value)
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: controller.filterValue["type"],
-                  items: [
-                    ...Constant.dropdownType.map(
-                      (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+                if (controller.isExpense.value)
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: controller.filterValue["type"],
+                      items: [
+                        ...Constant.dropdownType.map(
+                          (e) => DropdownMenuItem<String>(
+                            value: e,
+                            child: Text(e),
+                          ),
+                        ),
+                      ],
+                      decoration: const InputDecoration(labelText: 'Kategori'),
+                      onChanged: (val) {
+                        controller.filterValue["type"] = val!;
+                        controller.update();
+                        controller.filterData(controller.filterValue());
+                      },
                     ),
-                  ],
-                  decoration: const InputDecoration(labelText: 'Tipe'),
-                  onChanged: (val) {
-                    controller.filterValue["type"] = val!;
-                    controller.update();
-                    controller.filterData(controller.filterValue());
-                  },
+                  ),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: controller.filterValue["year"],
+                    items: [
+                      ...controller.listYear.map(
+                        (e) =>
+                            DropdownMenuItem<String>(value: e, child: Text(e)),
+                      ),
+                    ],
+                    decoration: const InputDecoration(labelText: 'Tahun'),
+                    onChanged: (val) {
+                      controller.filterValue["year"] = val!;
+                      controller.update();
+                      controller.filterData(controller.filterValue());
+                    },
+                  ),
                 ),
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: controller.filterValue["month"],
+                    items: [
+                      ...Constant.dropdownMonthOnly.entries.map(
+                        (e) => DropdownMenuItem<String>(
+                          value: e.key,
+                          child: Text(e.value),
+                        ),
+                      ),
+                    ],
+                    decoration: const InputDecoration(labelText: 'Bulan'),
+                    onChanged: (val) {
+                      controller.filterValue["month"] = val!;
+                      controller.update();
+                      controller.filterData(controller.filterValue());
+                    },
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
+      // Padding(
+      //   padding: const EdgeInsets.symmetric(horizontal: 5),
+      //   child: Row(
+      //     spacing: 10,
+      //     children: [
+      //       Expanded(
+      //         child: DropdownButtonFormField<String>(
+      //           initialValue: controller.isExpense.value
+      //               ? controller.filterValue["payment"]
+      //               : controller.filterValue["source"],
+      //           items: [
+      //             ...Constant.dropdownPayment.map(
+      //               (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+      //             ),
+      //           ],
+      //           decoration: InputDecoration(
+      //             labelText: controller.isExpense.value
+      //                 ? 'Pembayaran'
+      //                 : 'Sumber',
+      //           ),
+      //           onChanged: (val) {
+      //             controller.filterValue[controller.isExpense.value
+      //                     ? "payment"
+      //                     : "source"] =
+      //                 val!;
+      //             controller.update();
+      //             controller.filterData(controller.filterValue());
+      //           },
+      //         ),
+      //       ),
+      //       if (controller.isExpense.value)
+      //         Expanded(
+      //           child: DropdownButtonFormField<String>(
+      //             initialValue: controller.filterValue["type"],
+      //             items: [
+      //               ...Constant.dropdownType.map(
+      //                 (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+      //               ),
+      //             ],
+      //             decoration: const InputDecoration(labelText: 'Kategori'),
+      //             onChanged: (val) {
+      //               controller.filterValue["type"] = val!;
+      //               controller.update();
+      //               controller.filterData(controller.filterValue());
+      //             },
+      //           ),
+      //         ),
+      //     ],
+      //   ),
+      // ),
 
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
-        child: Row(
-          spacing: 10,
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                initialValue: controller.filterValue["year"],
-                items: [
-                  ...controller.listYear.map(
-                    (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
-                  ),
-                ],
-                decoration: const InputDecoration(labelText: 'Tahun'),
-                onChanged: (val) {
-                  controller.filterValue["year"] = val!;
-                  controller.update();
-                  controller.filterData(controller.filterValue());
-                },
-              ),
-            ),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                initialValue: controller.filterValue["month"],
-                items: [
-                  ...Constant.dropdownMonth.entries.map(
-                    (e) => DropdownMenuItem<String>(
-                      value: e.key,
-                      child: Text(e.value),
+      // Padding(
+      //   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      //   child: Row(
+      //     spacing: 10,
+      //     children: [
+      //       Expanded(
+      //         child: DropdownButtonFormField<String>(
+      //           initialValue: controller.filterValue["year"],
+      //           items: [
+      //             ...controller.listYear.map(
+      //               (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+      //             ),
+      //           ],
+      //           decoration: const InputDecoration(labelText: 'Tahun'),
+      //           onChanged: (val) {
+      //             controller.filterValue["year"] = val!;
+      //             controller.update();
+      //             controller.filterData(controller.filterValue());
+      //           },
+      //         ),
+      //       ),
+      //       Expanded(
+      //         child: DropdownButtonFormField<String>(
+      //           initialValue: controller.filterValue["month"],
+      //           items: [
+      //             ...Constant.dropdownMonth.entries.map(
+      //               (e) => DropdownMenuItem<String>(
+      //                 value: e.key,
+      //                 child: Text(e.value),
+      //               ),
+      //             ),
+      //           ],
+      //           decoration: const InputDecoration(labelText: 'Bulan'),
+      //           onChanged: (val) {
+      //             controller.filterValue["month"] = val!;
+      //             controller.update();
+      //             controller.filterData(controller.filterValue());
+      //           },
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      // ),
+      Builder(
+        builder: (context) {
+          final mediaQuery = MediaQuery.sizeOf(context);
+          final paymentList = Constant.dropdownPayment.sublist(1);
+          return Obx(
+            () => Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 5,
+              children: paymentList
+                  .map(
+                    (e) => ChoiceChip(
+                      selectedColor: Colors.purple,
+                      label: SizedBox(
+                        width:
+                            mediaQuery.width / paymentList.length -
+                            paymentList.length * 5,
+                        child: Text(
+                          e,
+                          style: const TextStyle(color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      selected: controller.selectedPayment.contains(e),
+                      onSelected: (value) {
+                        if (value) {
+                          controller.selectedPayment.add(e);
+                        } else {
+                          controller.selectedPayment.remove(e);
+                        }
+                        controller.update();
+                        controller.listData();
+                      },
                     ),
-                  ),
-                ],
-                decoration: const InputDecoration(labelText: 'Bulan'),
-                onChanged: (val) {
-                  controller.filterValue["month"] = val!;
-                  controller.update();
-                  controller.filterData(controller.filterValue());
-                },
-              ),
+                  )
+                  .toList(),
             ),
-          ],
-        ),
+          );
+        },
       ),
       Card(
         elevation: 3,
@@ -612,7 +749,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
               ),
               Text(
                 GF.rupiahFormat(
-                  controller.totalSpending()["List"],
+                  controller.totalSpendMap()["List"] ?? 0.0,
                   symbol: "Rp",
                 ),
               ),

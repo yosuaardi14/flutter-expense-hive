@@ -1,21 +1,15 @@
 import 'package:flutter_expense_app/modules/base/controllers/expense_base_controller.dart';
 import 'package:get/get.dart';
-// ignore: depend_on_referenced_packages
-import "package:collection/collection.dart";
-
-import 'package:intl/intl.dart';
 import '../../../models/expense.dart';
 import '../../../utils/constant.dart';
-import '../../../utils/global_functions.dart';
 
 class ExpenseTableController extends ExpenseBaseController {
-  bool isLoading = false;
   final daysInMonth = 28.obs;
   final type = Constant.dropdownType[1].obs;
   final payment = Constant.dropdownPayment[0].obs;
   final tableItem = <Map<String, dynamic>>[].obs;
   final month = "0".obs;
-  final year = "2024".obs;
+  final year = "2025".obs;
   final listYear = <String>[].obs;
   final selectedPayment = [...Constant.dropdownPayment].obs;
 
@@ -37,16 +31,18 @@ class ExpenseTableController extends ExpenseBaseController {
   }
 
   void listData() async {
-    isLoading = true;
-    update();
-    listExpense.value = await dbService.fetchListData();
-    listExpense.value = listExpense
-        .where((e) => selectedPayment.any((payment) => payment == e.payment))
-        .toList();
+    showLoading();
+
+    listExpense.value = await expenseService.fetchListFilterData(
+      null,
+      null,
+      selectedPayment,
+      DateTime(int.parse(year.value), int.parse(month.value), 1),
+      DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
+    );
     calculateDayInMonth();
 
-    isLoading = false;
-    update();
+    hideLoading();
   }
 
   void calculateDayInMonth() {
@@ -57,37 +53,19 @@ class ExpenseTableController extends ExpenseBaseController {
       const Duration(days: 1),
     );
     daysInMonth.value = lastDayOfThisMonth.day;
-    _groupByDate(listExpense, expenseData);
+    // _groupData(listExpense, expenseData);
+    groupByDate(listExpense, expenseData, ascending: true);
+    _createTableData(listExpense, expenseData);
   }
 
-  double totalSpend(int day) {
+  double totalSpendByDay(int day) {
     List<Expense>? data = expenseData["$day-${month.value}-${year.value}"];
     if (data == null) return 0.0;
     return data.fold(0.0, (sum, item) => sum + item.amount);
   }
 
-  void _groupByDate(RxList<Expense> list, RxMap<String, dynamic> data) {
-    Map<String, dynamic> newMap =
-        groupBy(
-          list,
-          (Expense obj) => DateFormat("dd-MM-yyyy").format(obj.date),
-        ).map((k, v) {
-          return MapEntry(
-            k,
-            v.map((item) {
-              return item;
-            }).toList(),
-          );
-        });
-    Map<String, dynamic> sortedByKeyMap = Map.fromEntries(
-      newMap.entries.toList()..sort(
-        (e1, e2) =>
-            GF.stringToDateTime(e1.key).compareTo(GF.stringToDateTime(e2.key)),
-      ),
-    );
-    data.value = sortedByKeyMap;
-
-    //
+  void _createTableData(RxList<Expense> list, RxMap<String, dynamic> data) {
+    // groupByDate(list, data, ascending: true);
     double totalIncome = 0.0;
     double totalOutcome = 0.0;
     double totalSisa = 0.0;

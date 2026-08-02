@@ -6,19 +6,22 @@ class BaseDrawer extends StatelessWidget {
   const BaseDrawer({super.key});
 
   static const Map<String, dynamic> drawerItem = {
-    "Expense List": Routes.EXPENSE_LIST,
-    "Expense Calendar": Routes.EXPENSE_CALENDAR,
-    "Expense Table": Routes.EXPENSE_TABLE,
+    // "Home": Routes.HOME,
+    "Expense": Routes.EXPENSE,
+    "Budget": Routes.BUDGET,
+    "Setting": Routes.SETTING,
   };
 
   Icon getIcon(String menu) {
     switch (menu) {
-      case "Expense List":
-        return const Icon(Icons.list);
-      case "Expense Calendar":
-        return const Icon(Icons.calendar_month);
-      case "Expense Table":
-        return const Icon(Icons.table_view_outlined);
+      case "Home":
+        return const Icon(Icons.home);
+      case "Expense":
+        return const Icon(Icons.attach_money);
+      case "Budget":
+        return const Icon(Icons.account_balance_wallet);
+      case "Setting":
+        return const Icon(Icons.settings);
     }
     return const Icon(Icons.menu);
   }
@@ -32,10 +35,16 @@ class BaseDrawer extends StatelessWidget {
           children: [
             Container(
               color: Colors.purple,
-              child: const FlutterLogo(
-                size: 250,
-                style: FlutterLogoStyle.stacked,
-                textColor: Colors.white,
+              child: Column(
+                spacing: 10,
+                children: [
+                  const FlutterLogo(
+                    size: 200,
+                    style: FlutterLogoStyle.markOnly,
+                    textColor: Colors.white,
+                  ),
+                  Text("Expense App", style: TextStyle(color: Colors.white, fontSize: 36)),
+                ],
               ),
             ),
             ...drawerItem.entries.map((e) {

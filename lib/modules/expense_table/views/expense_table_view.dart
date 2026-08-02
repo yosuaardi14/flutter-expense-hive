@@ -6,7 +6,7 @@ import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:get/get.dart';
 
 import '../../../utils/constant.dart';
-// import '../../base/widgets/base_drawer.dart';
+import '../../base/widgets/base_drawer.dart';
 import '../../expense_add/controllers/expense_add_controller.dart';
 import '../../expense_add/views/expense_add_view.dart';
 import '../controllers/expense_table_controller.dart';
@@ -24,11 +24,19 @@ class ExpenseTableView extends GetView<ExpenseTableController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const BaseAppBar(
+      appBar: BaseAppBar(
         postFixtitleText: " - Table",
         centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              controller.listData();
+            },
+          ),
+        ],
       ),
-      // drawer: const BaseDrawer(),
+      drawer: const BaseDrawer(),
       body: GetBuilder<ExpenseTableController>(
         init: controller..listData(),
         builder: (controller) {
@@ -106,8 +114,7 @@ class ExpenseTableView extends GetView<ExpenseTableController> {
                               ),
                               onChanged: (val) {
                                 controller.year.value = val!;
-                                controller.calculateDayInMonth();
-                                controller.update();
+                                controller.listData();
                               },
                             ),
                           ),
@@ -128,8 +135,7 @@ class ExpenseTableView extends GetView<ExpenseTableController> {
                               ),
                               onChanged: (val) {
                                 controller.month.value = val!;
-                                controller.calculateDayInMonth();
-                                controller.update();
+                                controller.listData();
                               },
                             ),
                           ),
