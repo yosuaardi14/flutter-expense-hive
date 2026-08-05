@@ -1,5 +1,3 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'package:flutter/material.dart';
 import 'package:flutter_expense_app/utils/constant.dart';
 import 'package:get/get.dart';
@@ -7,9 +5,7 @@ import 'package:get/get.dart';
 import '../../base/controllers/expense_base_controller.dart';
 
 class ExpenseListController extends ExpenseBaseController {
-  bool showChart = true;
-  bool showList = true;
-  bool isFilter = false;
+  final isFilter = false.obs;
   final pageIndex = 0.obs;
   final filterValue = {
     "type": "Semua",
@@ -48,7 +44,7 @@ class ExpenseListController extends ExpenseBaseController {
   void switchList() {
     isExpense.toggle();
     update();
-    isFilter = false;
+    isFilter.value = false;
     filterValue["type"] = "Semua";
     filterValue.refresh();
     listData();
