@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_expense_app/models/budget.dart';
 import 'package:flutter_expense_app/models/expense.dart';
 import 'package:flutter_expense_app/modules/base/controllers/expense_base_controller.dart';
@@ -231,7 +232,15 @@ class SettingController extends ExpenseBaseController {
       message: "Apakah Anda yakin ingin menghapus semua data Expense?",
     );
     if (result) {
-      await expenseService.deleteAllData();
+      try {
+        await expenseService.deleteAllData();
+        GF.showInformationDialog(
+          "Berhasil",
+          "Semua data Expense berhasil dihapus",
+        );
+      } catch (e) {
+        GF.showInformationDialog("Gagal", "Data Expense gagal dihapus");
+      }
     }
   }
 
@@ -240,7 +249,46 @@ class SettingController extends ExpenseBaseController {
       message: "Apakah Anda yakin ingin menghapus semua data Budget?",
     );
     if (result) {
-      await budgetService.deleteAllDataBudget();
+      try {
+        await budgetService.deleteAllDataBudget();
+        GF.showInformationDialog(
+          "Berhasil",
+          "Semua data Budget berhasil dihapus",
+        );
+      } catch (e) {
+        GF.showInformationDialog("Gagal", "Data Budget gagal dihapus");
+      }
+    }
+  }
+
+  void resetDataRange() async {
+    final dateRange = await showDateRangePicker(
+      context: Get.context!,
+      firstDate: DateTime(1800),
+      lastDate: DateTime.now(),
+    );
+    if (dateRange != null) {
+      final result = await GF.showConfirmationDeleteDialog(
+        message:
+            "Apakah Anda yakin ingin menghapus semua data Expense dari ${GF.dateFormatString(dateRange.start)} sampai ${GF.dateFormatString(dateRange.end)}?",
+      );
+      if (result) {
+        try {
+          final total = await expenseService.deleteRangeData(
+            dateRange.start,
+            dateRange.end,
+          );
+          GF.showInformationDialog(
+            "Berhasil",
+            "$total data Expense berhasil dihapus",
+          );
+        } catch (e) {
+          GF.showInformationDialog(
+            "Gagal",
+            "Data Expense dari ${GF.dateFormatString(dateRange.start)} sampai ${GF.dateFormatString(dateRange.end)} gagal dihapus",
+          );
+        }
+      }
     }
   }
 

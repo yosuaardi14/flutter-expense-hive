@@ -38,6 +38,13 @@ class SettingView extends GetView<SettingController> {
               ),
               Card(
                 child: ListTile(
+                  trailing: const Icon(Icons.delete, color: Colors.purple),
+                  title: const Text("Delete Data Expense"),
+                  onTap: controller.resetDataRange,
+                ),
+              ),
+              Card(
+                child: ListTile(
                   trailing: const Icon(Icons.refresh, color: Colors.purple),
                   title: const Text("Reset Data Expense"),
                   onTap: controller.resetData,
