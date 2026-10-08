@@ -155,4 +155,27 @@ class SqliteExpenseService extends GetxService implements ExpenseCrudService {
 
     return (result.first['total'] as num).toDouble();
   }
+
+  @override
+  Future<int> deleteRangeData(DateTime? dateStart, DateTime? dateEnd) async {
+    final endExclusive = dateEnd?.add(const Duration(days: 1));
+    Database db = await appDb.database;
+    final conditions = <String>[];
+    final args = <Object?>[];
+    if (dateStart != null) {
+      conditions.add('${appDb.columnDate} >= ?');
+      args.add(dateStart.toString());
+    }
+
+    if (endExclusive != null) {
+      conditions.add('${appDb.columnDate} < ?');
+      args.add(endExclusive.toString());
+    }
+
+    return await db.delete(
+      appDb.tableExpense,
+      where: conditions.isEmpty ? null : conditions.join(' AND '),
+      whereArgs: args,
+    );
+  }
 }

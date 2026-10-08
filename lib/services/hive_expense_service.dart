@@ -111,4 +111,23 @@ class HiveExpenseService extends GetxService implements ExpenseCrudService {
         .toList()
         .fold<double>(0.0, (sum, item) => sum + item.amount);
   }
+
+  @override
+  Future<int> deleteRangeData(DateTime? dateStart, DateTime? dateEnd) async {
+    final endExclusive = dateEnd?.add(const Duration(days: 1));
+    Box db = appDb.expenseBox;
+    final keysToDelete = db.keys.where((key) {
+      final e = Expense.fromMap(Map<String, dynamic>.from(db.get(key)));
+      if (dateStart != null && e.date.isBefore(dateStart)) return false;
+      if (endExclusive != null && !e.date.isBefore(endExclusive)) return false;
+      return true;
+    }).toList();
+    await db.deleteAll(keysToDelete);
+    _master.removeWhere((e) {
+      if (dateStart != null && e.date.isBefore(dateStart)) return false;
+      if (endExclusive != null && !e.date.isBefore(endExclusive)) return false;
+      return true;
+    });
+    return keysToDelete.length;
+  }
 }
