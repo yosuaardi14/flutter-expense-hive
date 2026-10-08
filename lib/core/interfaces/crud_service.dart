@@ -19,6 +19,7 @@ abstract class ExpenseCrudService {
   Future<void> insertData(Map<String, dynamic> expense);
   Future<void> updateData(String id, Map<String, dynamic> expense);
   Future<void> deleteData(String id);
+  Future<int> deleteRangeData(DateTime? dateStart, DateTime? dateEnd);
   Future<int> deleteAllData();
 }
 
