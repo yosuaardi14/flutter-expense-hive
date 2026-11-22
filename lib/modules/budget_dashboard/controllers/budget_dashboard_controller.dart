@@ -52,12 +52,11 @@ class BudgetDashboardController extends ExpenseBaseController {
       start: DateTime(now.year, now.month, 1),
       end: now,
     );
-    listData();
   }
 
   @override
   void onReady() {
-    update();
+    listData();
   }
 
   void listData() async {
@@ -66,7 +65,7 @@ class BudgetDashboardController extends ExpenseBaseController {
 
   void onChangeTab(int value) async {
     tabIndex(value);
-    update();
+
     DateTime? selectedDate;
     int currentWeek = 1;
     if (tabIndex.value == 1) {
@@ -98,7 +97,6 @@ class BudgetDashboardController extends ExpenseBaseController {
             Duration(days: (currentWeek - 1) * 7 - (selectedDate.weekday - 1)),
           );
         }
-        update();
       }
     } else {
       DateTime now = DateTime.now();
@@ -151,7 +149,6 @@ class BudgetDashboardController extends ExpenseBaseController {
     } else {
       percentageBudget.value = totalExpense.value / totalBudget.value;
     }
-    update();
   }
 
   List<Budget> convertDailyAsMonthBudget(
@@ -294,7 +291,6 @@ class BudgetDashboardController extends ExpenseBaseController {
           return budget;
         })
         .toList();
-    update();
   }
 
   double calculatePercentage(Budget budget) {
@@ -525,7 +521,6 @@ class BudgetDashboardController extends ExpenseBaseController {
       dayController.text =
           "${selectedDay.value} ${Constant.dropdownMonthOnly[month.value]} ${year.value}";
       onChangeTab(tabIndex.value);
-      update();
     }
   }
 
@@ -535,7 +530,6 @@ class BudgetDashboardController extends ExpenseBaseController {
     if (canNavigate) {
       selectedWeek.value = listWeek[index + (isNext ? 1 : -1)];
       onChangeTab(tabIndex.value);
-      update();
     }
   }
 
@@ -556,7 +550,6 @@ class BudgetDashboardController extends ExpenseBaseController {
       month.value = temp.month.toString();
       year.value = temp.year.toString();
       onChangeTab(tabIndex.value);
-      update();
     }
   }
 
@@ -577,7 +570,6 @@ class BudgetDashboardController extends ExpenseBaseController {
       dateRangeController.text =
           "${dateRange.value.start.day} - ${dateRange.value.end.day} ${Constant.dropdownMonthOnly[dateRange.value.end.month.toString()]} ${dateRange.value.end.year}";
       onChangeTab(tabIndex.value);
-      update();
     }
   }
 }

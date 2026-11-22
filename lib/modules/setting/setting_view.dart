@@ -17,64 +17,59 @@ class SettingView extends GetView<SettingController> {
         centerTitle: false,
       ),
       drawer: const BaseDrawer(),
-      body: GetBuilder(
-        init: controller,
-        builder: (controller) {
-          return Column(
-            children: [
-              Card(
-                child: ListTile(
-                  trailing: const Icon(Icons.download, color: Colors.purple),
-                  title: const Text("Export Expense CSV"),
-                  onTap: controller.exportToCSV,
-                ),
-              ),
-              Card(
-                child: ListTile(
-                  trailing: const Icon(Icons.upload, color: Colors.purple),
-                  title: const Text("Import Expense CSV"),
-                  onTap: controller.importFromCSV,
-                ),
-              ),
-              Card(
-                child: ListTile(
-                  trailing: const Icon(Icons.delete, color: Colors.purple),
-                  title: const Text("Delete Data Expense"),
-                  onTap: controller.resetDataRange,
-                ),
-              ),
-              Card(
-                child: ListTile(
-                  trailing: const Icon(Icons.refresh, color: Colors.purple),
-                  title: const Text("Reset Data Expense"),
-                  onTap: controller.resetData,
-                ),
-              ),
-              const Divider(),
-              Card(
-                child: ListTile(
-                  trailing: const Icon(Icons.download, color: Colors.purple),
-                  title: const Text("Export Budget CSV"),
-                  onTap: controller.exportBudgetToCSV,
-                ),
-              ),
-              Card(
-                child: ListTile(
-                  trailing: const Icon(Icons.upload, color: Colors.purple),
-                  title: const Text("Import Budget CSV"),
-                  onTap: controller.importBudgetFromCSV,
-                ),
-              ),
-              Card(
-                child: ListTile(
-                  trailing: const Icon(Icons.refresh, color: Colors.purple),
-                  title: const Text("Reset Data Budget"),
-                  onTap: controller.resetDataBudget,
-                ),
-              ),
-            ],
-          );
-        },
+      body: Column(
+        children: [
+          Card(
+            child: ListTile(
+              trailing: const Icon(Icons.download, color: Colors.purple),
+              title: const Text("Export Expense CSV"),
+              onTap: controller.exportToCSV,
+            ),
+          ),
+          Card(
+            child: ListTile(
+              trailing: const Icon(Icons.upload, color: Colors.purple),
+              title: const Text("Import Expense CSV"),
+              onTap: controller.importFromCSV,
+            ),
+          ),
+          Card(
+            child: ListTile(
+              trailing: const Icon(Icons.delete, color: Colors.purple),
+              title: const Text("Delete Data Expense"),
+              onTap: controller.resetDataRange,
+            ),
+          ),
+          Card(
+            child: ListTile(
+              trailing: const Icon(Icons.refresh, color: Colors.purple),
+              title: const Text("Reset Data Expense"),
+              onTap: controller.resetData,
+            ),
+          ),
+          const Divider(),
+          Card(
+            child: ListTile(
+              trailing: const Icon(Icons.download, color: Colors.purple),
+              title: const Text("Export Budget CSV"),
+              onTap: controller.exportBudgetToCSV,
+            ),
+          ),
+          Card(
+            child: ListTile(
+              trailing: const Icon(Icons.upload, color: Colors.purple),
+              title: const Text("Import Budget CSV"),
+              onTap: controller.importBudgetFromCSV,
+            ),
+          ),
+          Card(
+            child: ListTile(
+              trailing: const Icon(Icons.refresh, color: Colors.purple),
+              title: const Text("Reset Data Budget"),
+              onTap: controller.resetDataBudget,
+            ),
+          ),
+        ],
       ),
     );
   }

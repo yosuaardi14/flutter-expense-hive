@@ -17,18 +17,19 @@ class SettingController extends ExpenseBaseController {
   void exportToCSV() async {
     listExpense.value = await expenseService.fetchListData(reload: true);
     List<List<dynamic>> data = [...listExpense.map((e) => e.toList())];
-    CsvUtil.export(data, type: "EXPENSE");
+    await CsvUtil.export(data, type: "EXPENSE");
   }
 
   void exportBudgetToCSV() async {
     listBudget.value = await budgetService.fetchListDataBudget(reload: true);
     List<List<dynamic>> data = [...listBudget.map((e) => e.toList())];
-    CsvUtil.export(data, type: "BUDGET");
+    await CsvUtil.export(data, type: "BUDGET");
   }
 
-  void onClickImport() {
-    if (file.value?.bytes != null) {
-      Get.back(result: CsvUtil.import(file.value!.bytes!));
+  void onClickImport() async {
+    final bytes = await file.value?.readAsBytes();
+    if (bytes != null) {
+      Get.back(result: CsvUtil.import(bytes));
     } else {
       GF.showInformationDialog("Peringatan", "Anda belum memilih File");
     }
@@ -36,19 +37,19 @@ class SettingController extends ExpenseBaseController {
 
   void onChangedImportMode(String? val) {
     importMode.value = val ?? "Merge";
-    update();
   }
 
   void onChooseFile() async {
-    final result = await FilePicker.pickFiles(
-      withData: true,
+    final result = await FilePicker.pickFile(
+      androidOptions: AndroidOptions(),
+      webOptions: WebOptions(),
+      // withData: true,
       type: FileType.custom,
       allowedExtensions: ["csv"],
-      allowMultiple: false,
+      // allowMultiple: false,
     );
-    file.value = result?.files.first;
-    fileController.text = result?.files.first.name ?? "";
-    update();
+    file.value = result;
+    fileController.text = result?.name ?? "";
     // if (result != null) {
     //   file.value = result.files.first;
     //   fileController.text = result.files.first.name;
@@ -295,6 +296,5 @@ class SettingController extends ExpenseBaseController {
     file.value = null;
     fileController.text = "";
     importMode.value = "Merge";
-    update();
   }
 }

@@ -308,7 +308,7 @@ class BudgetDashboardView extends GetView<BudgetDashboardController> {
                                       if (res != null) {
                                         controller.selectedDay.value = res.day
                                             .toString();
-                                        controller.update();
+                                        // controller.update();
                                         controller.dayController.text =
                                             "${controller.selectedDay.value} ${Constant.dropdownMonthOnly[controller.month.value]} ${controller.year.value}";
                                         controller.listData();
@@ -371,7 +371,7 @@ class BudgetDashboardView extends GetView<BudgetDashboardController> {
                                       ),
                                       onChanged: (val) {
                                         controller.selectedWeek.value = val!;
-                                        controller.update();
+                                        // controller.update();
                                         controller.listData();
                                       },
                                     ),
