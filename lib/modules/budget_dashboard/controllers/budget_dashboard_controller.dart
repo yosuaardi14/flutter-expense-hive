@@ -15,7 +15,6 @@ class BudgetDashboardController extends ExpenseBaseController {
   final week = "1".obs;
   final month = "0".obs;
   final year = "2024".obs;
-  final listYear = <String>[].obs;
   final periodIndex = <int>{0}.obs;
   final totalBudget = 0.0.obs;
   final totalExpense = 0.0.obs;
@@ -43,11 +42,7 @@ class BudgetDashboardController extends ExpenseBaseController {
     month.value = now.month.toString();
     year.value = now.year.toString();
     day.value = now.day.toString();
-    listYear.value = List.generate(
-      DateTime.now().year - 2020 + 1,
-      (index) => (2020 + index).toString(),
-    );
-    listYear.value = listYear.reversed.toList();
+    listYear.addAll(GF.listYear());
     dateRange.value = DateTimeRange(
       start: DateTime(now.year, now.month, 1),
       end: now,
@@ -449,24 +444,6 @@ class BudgetDashboardController extends ExpenseBaseController {
     final selectedMonth = int.tryParse(month.value) ?? now.month;
     final selectedYear = int.tryParse(year.value) ?? now.year;
     return DateTime(selectedYear, selectedMonth + 1, 0).day;
-  }
-
-  ({int start, int end}) weekRangeOfMonth({
-    required int year,
-    required int month,
-    required int weekIndex,
-  }) {
-    final firstDay = DateTime(year, month, 1);
-    final daysInMonth = DateTime(year, month + 1, 0).day;
-    final firstWeekday = firstDay.weekday; // Mon=1..Sun=7
-
-    int startDay = 1 + (weekIndex - 1) * 7 - (firstWeekday - 1);
-    int endDay = startDay + 6;
-
-    startDay = startDay < 1 ? 1 : startDay;
-    endDay = endDay > daysInMonth ? daysInMonth : endDay;
-
-    return (start: startDay, end: endDay);
   }
 
   List<Expense> getDayExpenses({String? type, DateTime? selected}) {

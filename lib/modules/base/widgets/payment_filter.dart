@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expense_app/utils/constant.dart';
 
-class PaymentFilter extends StatefulWidget {
+class PaymentFilter extends StatelessWidget {
   final bool Function(String value) isSelected;
   final void Function(bool value, String payment) onSelected;
 
@@ -11,16 +11,13 @@ class PaymentFilter extends StatefulWidget {
     required this.onSelected,
   });
 
-  @override
-  State<PaymentFilter> createState() => _PaymentFilterState();
-}
-
-class _PaymentFilterState extends State<PaymentFilter> {
-  final paymentList = Constant.dropdownPayment.sublist(1);
+  static final paymentList = List.unmodifiable(
+    Constant.dropdownPayment.sublist(1),
+  );
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.sizeOf(context);
+    final mediaQueryWidth = MediaQuery.sizeOf(context).width;
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       spacing: 5,
@@ -30,7 +27,7 @@ class _PaymentFilterState extends State<PaymentFilter> {
               selectedColor: Colors.purple,
               label: SizedBox(
                 width:
-                    mediaQuery.width / paymentList.length -
+                    mediaQueryWidth / paymentList.length -
                     paymentList.length * 5,
                 child: Text(
                   e,
@@ -38,9 +35,9 @@ class _PaymentFilterState extends State<PaymentFilter> {
                   textAlign: TextAlign.center,
                 ),
               ),
-              selected: widget.isSelected(e),
+              selected: isSelected(e),
               onSelected: (value) {
-                widget.onSelected(value, e);
+                onSelected(value, e);
               },
             ),
           )

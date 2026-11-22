@@ -17,6 +17,18 @@ class ModeTypeFilter extends StatelessWidget {
     required this.onChangedType,
   });
 
+  static final _modeItems = List<DropdownMenuItem<String>>.unmodifiable(
+    Constant.mode.map(
+      (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+    ),
+  );
+
+  static final _typeItems = List<DropdownMenuItem<String>>.unmodifiable(
+    Constant.dropdownType.map(
+      (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -24,11 +36,7 @@ class ModeTypeFilter extends StatelessWidget {
         Expanded(
           child: DropdownButtonFormField<String>(
             initialValue: modeValue,
-            items: [
-              ...Constant.mode.map(
-                (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
-              ),
-            ],
+            items: _modeItems,
             decoration: const InputDecoration(labelText: 'Jenis'),
             onChanged: onChangedMode,
           ),
@@ -38,11 +46,7 @@ class ModeTypeFilter extends StatelessWidget {
           Expanded(
             child: DropdownButtonFormField<String>(
               initialValue: typeValue,
-              items: [
-                ...Constant.dropdownType.map(
-                  (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
-                ),
-              ],
+              items: _typeItems,
               decoration: const InputDecoration(labelText: 'Kategori'),
               onChanged: onChangedType,
             ),

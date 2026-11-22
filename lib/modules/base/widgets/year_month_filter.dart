@@ -17,6 +17,12 @@ class YearMonthFilter extends StatelessWidget {
     this.onChangedMonth,
   });
 
+  static final _monthItems = List<DropdownMenuItem<String>>.unmodifiable(
+    Constant.dropdownMonthOnly.entries.map(
+      (e) => DropdownMenuItem<String>(value: e.key, child: Text(e.value)),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -37,14 +43,7 @@ class YearMonthFilter extends StatelessWidget {
         Expanded(
           child: DropdownButtonFormField<String>(
             initialValue: monthValue,
-            items: [
-              ...Constant.dropdownMonthOnly.entries.map(
-                (e) => DropdownMenuItem<String>(
-                  value: e.key,
-                  child: Text(e.value),
-                ),
-              ),
-            ],
+            items: _monthItems,
             decoration: const InputDecoration(labelText: 'Bulan'),
             onChanged: onChangedMonth,
           ),

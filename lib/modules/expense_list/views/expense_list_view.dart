@@ -113,7 +113,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
               );
             }),
             Obx(() {
-              final totalMonth = controller.totalSpendMap()["Listu"];
+              final totalMonth = controller.totalSpendMap()["List"];
               return Card(
                 elevation: 3,
                 child: Padding(

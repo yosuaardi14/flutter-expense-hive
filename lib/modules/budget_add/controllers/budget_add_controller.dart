@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../models/budget.dart';
 import '../../../utils/constant.dart';
+import '../../../utils/global_functions.dart';
 import '../../base/controllers/expense_base_controller.dart';
 
 class BudgetAddController extends ExpenseBaseController {
@@ -12,7 +13,6 @@ class BudgetAddController extends ExpenseBaseController {
 
   final month = "0".obs;
   final year = "2024".obs;
-  final listYear = <String>[].obs;
   final period = "Per Bulan".obs;
 
   final weekList = <int>[].obs;
@@ -36,11 +36,7 @@ class BudgetAddController extends ExpenseBaseController {
     super.onInit();
     month.value = DateTime.now().month.toString();
     year.value = DateTime.now().year.toString();
-    listYear.value = List.generate(
-      DateTime.now().year - 2020 + 1,
-      (index) => (2020 + index).toString(),
-    );
-    listYear.value = listYear.reversed.toList();
+    listYear.addAll(GF.listYear());
     generateWeekList();
     period.value = Constant.dropdownBudgetPeriod.last;
   }

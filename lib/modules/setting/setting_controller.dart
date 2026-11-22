@@ -48,6 +48,10 @@ class SettingController extends ExpenseBaseController {
       allowedExtensions: ["csv"],
       // allowMultiple: false,
     );
+    if (result != null && result.extension != "csv") {
+      GF.showInformationDialog("Peringatan", "Ekstensi File harus CSV");
+      return;
+    }
     file.value = result;
     fileController.text = result?.name ?? "";
     // if (result != null) {
@@ -59,172 +63,123 @@ class SettingController extends ExpenseBaseController {
     // }
   }
 
-  void importFromCSV() async {
-    resetForm();
-    final result = await Get.bottomSheet<List<List<dynamic>>?>(
-      const ImportDialog(),
-    );
-    if (result == null || result.isEmpty) {
-      return GF.showInformationDialog("Peringatan", "Data tidak ditemukan");
+  Future<void> _importCsv<T>({
+    required String label,
+    required List<List<dynamic>>? rows,
+    required int expectedLength,
+    required T Function(List<dynamic> row) fromList,
+    required Map<String, dynamic> Function(T item) toMap,
+    required String Function(T item) getId,
+    required void Function(T item, String id) setId,
+    required Future<T?> Function(String id) fetch,
+    required Future<void> Function(Map<String, dynamic> data) insert,
+    required Future<void> Function(String id, Map<String, dynamic> data) update,
+    required Future<void> Function() deleteAll,
+  }) async {
+    if (rows == null) {
+      return;
     }
+    if (rows.isEmpty) {
+      GF.showInformationDialog("Peringatan", "Data tidak ditemukan");
+      return;
+    }
+
     try {
       int counter = 0;
-      // Insert data -> Import sebagai data baru
-      if (importMode.value == "Insert") {
-        for (var i = 0; i < result.length; i++) {
-          if (result[i].length != Expense.props().length) {
-            continue;
-          }
-          // Import semua data yang belum ada
-          Expense expense = Expense.fromList(result[i]);
-          // Expense? expenseData = await dbService.fetchData(expense.id);
-          // if (expenseData == null) {
-          //   await dbService.insertData(expense.toMap());
-          // }
-          // // Import semua data sebagai data baru
-          expense.id = DateTime.now().toString();
-          await expenseService.insertData(expense.toMap());
-          counter++;
-        }
+      final mode = importMode.value;
+
+      if (mode == "Replace") {
+        await deleteAll();
       }
-      // Merge data -> Menambahkan data yang belum ada
-      else if (importMode.value == "Merge") {
-        for (var i = 0; i < result.length; i++) {
-          if (result[i].length != Expense.props().length) {
-            continue;
-          }
-          // Import semua data yang belum ada
-          Expense expense = Expense.fromList(result[i]);
-          Expense? expenseData = await expenseService.fetchData(expense.id);
-          if (expenseData == null) {
-            await expenseService.insertData(expense.toMap());
+
+      for (final row in rows) {
+        if (row.length != expectedLength) continue; // skip baris invalid
+
+        final item = fromList(row);
+        final id = getId(item);
+
+        switch (mode) {
+          case "Insert":
+            setId(
+              item,
+              DateTime.now().toString(),
+            ); // id baru -> sebagai data baru
+            await insert(toMap(item));
             counter++;
-          }
+            break;
+
+          case "Merge":
+            if (await fetch(id) == null) {
+              await insert(toMap(item));
+              counter++;
+            }
+            break;
+
+          case "Replace":
+            await insert(toMap(item));
+            counter++;
+            break;
+
+          case "Update":
+            if (await fetch(id) != null) {
+              await update(id, toMap(item));
+            } else {
+              await insert(toMap(item));
+            }
+            counter++;
+            break;
         }
       }
-      // Replace data -> Hapus semua data lama, Menambahkan data baru
-      else if (importMode.value == "Replace") {
-        await expenseService.deleteAllData();
-        for (var i = 0; i < result.length; i++) {
-          if (result[i].length != Expense.props().length) {
-            continue;
-          }
-          await expenseService.insertData(Expense.fromList(result[i]).toMap());
-          counter++;
-        }
-      }
-      // Update data -> Jika id sama maka update data
-      else if (importMode.value == "Update") {
-        for (var i = 0; i < result.length; i++) {
-          if (result[i].length != Expense.props().length) {
-            continue;
-          }
-          Expense expense = Expense.fromList(result[i]);
-          Expense? expenseData = await expenseService.fetchData(expense.id);
-          if (expenseData != null) {
-            await expenseService.updateData(expense.id, expense.toMap());
-          } else {
-            await expenseService.insertData(expense.toMap());
-          }
-          counter++;
-        }
-      }
-      if (counter > 0) {
-        GF.showInformationDialog(
-          "Berhasil",
-          "Import data Expense Berhasil ($counter dari ${result.length})",
-        );
-      } else {
-        GF.showInformationDialog("Gagal", "Tidak ada data yang diimport");
-      }
-    } catch (e) {
-      GF.showInformationDialog("Gagal", "Import data Expense gagal");
+
+      GF.showInformationDialog(
+        counter > 0 ? "Berhasil" : "Gagal",
+        counter > 0
+            ? "Import data $label Berhasil ($counter dari ${rows.length})"
+            : "Tidak ada data yang diimport",
+      );
+    } catch (_) {
+      GF.showInformationDialog("Gagal", "Import data $label gagal");
     }
+  }
+
+  void importFromCSV() async {
+    resetForm();
+    final rows = await Get.bottomSheet<List<List<dynamic>>?>(
+      const ImportDialog(),
+    );
+    await _importCsv<Expense>(
+      label: "Expense",
+      rows: rows,
+      expectedLength: Expense.props().length,
+      fromList: Expense.fromList,
+      toMap: (e) => e.toMap(),
+      getId: (e) => e.id,
+      setId: (e, id) => e.id = id,
+      fetch: expenseService.fetchData,
+      insert: expenseService.insertData,
+      update: expenseService.updateData,
+      deleteAll: () => expenseService.deleteAllData(),
+    );
   }
 
   void importBudgetFromCSV() async {
     resetForm();
-    final result = await Get.bottomSheet<List<List<dynamic>>?>(
+    final rows = await Get.bottomSheet<List<List<dynamic>>?>(
       const ImportDialog(),
     );
-    if (result == null || result.isEmpty) {
-      return GF.showInformationDialog("Peringatan", "Data tidak ditemukan");
-    }
-    try {
-      int counter = 0;
-      // Insert data -> Import sebagai data baru
-      if (importMode.value == "Insert") {
-        for (var i = 0; i < result.length; i++) {
-          if (result[i].length != Budget.props().length) {
-            continue;
-          }
-          // Import semua data yang belum ada
-          Budget budget = Budget.fromList(result[i]);
-          // Expense? expenseData = await dbService.fetchData(expense.id);
-          // if (expenseData == null) {
-          //   await dbService.insertData(expense.toMap());
-          // }
-          // // Import semua data sebagai data baru
-          budget.id = DateTime.now().toString();
-          await budgetService.insertDataBudget(budget.toMap());
-          counter++;
-        }
-      }
-      // Merge data -> Menambahkan data yang belum ada
-      else if (importMode.value == "Merge") {
-        for (var i = 0; i < result.length; i++) {
-          if (result[i].length != Budget.props().length) {
-            continue;
-          }
-          // Import semua data yang belum ada
-          Budget budget = Budget.fromList(result[i]);
-          Budget? budgetData = await budgetService.fetchDataBudget(budget.id);
-          if (budgetData == null) {
-            await budgetService.insertDataBudget(budget.toMap());
-            counter++;
-          }
-        }
-      }
-      // Replace data -> Hapus semua data lama, Menambahkan data baru
-      else if (importMode.value == "Replace") {
-        await budgetService.deleteAllDataBudget();
-        for (var i = 0; i < result.length; i++) {
-          if (result[i].length != Budget.props().length) {
-            continue;
-          }
-          await budgetService.insertDataBudget(
-            Expense.fromList(result[i]).toMap(),
-          );
-          counter++;
-        }
-      }
-      // Update data -> Jika id sama maka update data
-      else if (importMode.value == "Update") {
-        for (var i = 0; i < result.length; i++) {
-          if (result[i].length != Budget.props().length) {
-            continue;
-          }
-          Budget budget = Budget.fromList(result[i]);
-          Budget? budgetData = await budgetService.fetchDataBudget(budget.id);
-          if (budgetData != null) {
-            await budgetService.updateDataBudget(budget.id, budget.toMap());
-          } else {
-            await budgetService.insertDataBudget(budget.toMap());
-          }
-          counter++;
-        }
-      }
-      if (counter > 0) {
-        GF.showInformationDialog(
-          "Berhasil",
-          "Import data Expense Berhasil ($counter dari ${result.length})",
-        );
-      } else {
-        GF.showInformationDialog("Gagal", "Tidak ada data yang diimport");
-      }
-    } catch (e) {
-      GF.showInformationDialog("Gagal", "Import data Budget gagal");
-    }
+    await _importCsv<Budget>(
+      label: "Budget",
+      rows: rows,
+      expectedLength: Budget.props().length,
+      fromList: Budget.fromList,
+      toMap: (b) => b.toMap(),
+      getId: (b) => b.id,
+      setId: (b, id) => b.id = id,
+      fetch: (id) => budgetService.fetchDataBudget(id),
+      insert: budgetService.insertDataBudget,
+      update: budgetService.updateDataBudget,
+      deleteAll: () => budgetService.deleteAllDataBudget(),
+    );
   }
 
   void resetData() async {
@@ -294,7 +249,13 @@ class SettingController extends ExpenseBaseController {
 
   void resetForm() {
     file.value = null;
-    fileController.text = "";
+    fileController.clear();
     importMode.value = "Merge";
+  }
+
+  @override
+  void onClose() {
+    fileController.dispose();
+    super.onClose();
   }
 }

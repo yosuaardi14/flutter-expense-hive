@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_expense_app/utils/constant.dart';
+
+import '../../../utils/constant.dart';
+import '../../../utils/global_functions.dart';
 
 class DayWidget extends StatelessWidget {
   final int weekIndex;
   final DateTime selectedDate;
-  const DayWidget({super.key, required this.selectedDate, required this.weekIndex});
+  
+  const DayWidget({
+    super.key,
+    required this.selectedDate,
+    required this.weekIndex,
+  });
 
   ({int start, int end}) weekRangeOfMonth({
     required int year,
@@ -26,7 +33,11 @@ class DayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = weekRangeOfMonth(year: selectedDate.year, month: selectedDate.month, weekIndex: weekIndex);
+    final data = GF.weekRangeOfMonth(
+      year: selectedDate.year,
+      month: selectedDate.month,
+      weekIndex: weekIndex,
+    );
     return ListTile(
       leading: IconButton(
         onPressed: () {
@@ -41,11 +52,9 @@ class DayWidget extends StatelessWidget {
         icon: Icon(Icons.navigate_next, color: Colors.purple),
       ),
 
-                      shape: BorderDirectional(
-                        bottom: BorderSide(color: Colors.grey),
-                      ),
-                      // contentPadding: EdgeInsets.symmetric(horizontal: 5),
-                      // dense: true,
+      shape: BorderDirectional(bottom: BorderSide(color: Colors.grey)),
+      // contentPadding: EdgeInsets.symmetric(horizontal: 5),
+      // dense: true,
       title: Row(
         spacing: 5,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -57,9 +66,7 @@ class DayWidget extends StatelessWidget {
               data.start + index,
             );
             return InkWell(
-              onTap: () {
-                
-              },
+              onTap: () {},
               child: Column(
                 children: [
                   Text(Constant.hari[day.weekday - 1].substring(0, 3)),

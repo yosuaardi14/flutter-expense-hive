@@ -18,6 +18,7 @@ abstract class ExpenseBaseController extends BaseController {
   final listExpense = <Expense>[].obs;
   final listBudget = <Budget>[].obs;
   final expenseData = <String, dynamic>{}.obs;
+  final listYear = <String>[];
 
   final expenseService = Get.find<ExpenseCrudService>();
   final budgetService = Get.find<BudgetCrudService>();

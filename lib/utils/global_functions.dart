@@ -132,4 +132,38 @@ class GF {
     }
     return dateOnlyString;
   }
+
+  static List<String> listYear({
+    int startYear = 2020,
+    DateTime? now,
+    bool descending = true,
+  }) {
+    final currentYear = (now ?? DateTime.now()).year;
+    if (currentYear < startYear) return <String>[];
+
+    final years = List<String>.generate(
+      currentYear - startYear + 1,
+      (index) => (startYear + index).toString(),
+    );
+
+    return descending ? years.reversed.toList() : years;
+  }
+
+  static ({int start, int end}) weekRangeOfMonth({
+    required int year,
+    required int month,
+    required int weekIndex,
+  }) {
+    final firstDay = DateTime(year, month, 1);
+    final daysInMonth = DateTime(year, month + 1, 0).day;
+    final firstWeekday = firstDay.weekday; // Mon=1 ... Sun=7
+
+    int startDay = 1 + (weekIndex - 1) * 7 - (firstWeekday - 1);
+    int endDay = startDay + 6;
+
+    if (startDay < 1) startDay = 1;
+    if (endDay > daysInMonth) endDay = daysInMonth;
+
+    return (start: startDay, end: endDay);
+  }
 }

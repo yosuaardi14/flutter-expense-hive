@@ -77,8 +77,8 @@ class ExpenseAddController extends ExpenseBaseController {
     Map<String, dynamic> data = {
       "title": titleController.text,
       "amount": amountController.text,
-      "type": isExpense.value ? typeValue : "Pemasukan",
-      "payment": isExpense.value ? paymentValue : incomeFromValue,
+      "type": isExpense.value ? typeValue.value : "Pemasukan",
+      "payment": isExpense.value ? paymentValue.value : incomeFromValue.value,
       "date": selectedDate.value.toString(),
       "id": DateTime.now().toString(),
     };

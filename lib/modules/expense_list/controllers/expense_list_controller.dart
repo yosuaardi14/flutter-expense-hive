@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../utils/constant.dart';
+import '../../../utils/global_functions.dart';
 import '../../base/controllers/expense_base_controller.dart';
 
 class ExpenseListController extends ExpenseBaseController {
@@ -9,7 +10,6 @@ class ExpenseListController extends ExpenseBaseController {
   final mode = "Outcome".obs;
   final month = "0".obs;
   final year = "2026".obs;
-  final listYear = <String>[];
   final selectedPayment = [...Constant.dropdownPayment].obs;
   final totalSpendMap = <String, double>{
     "Hari ini": 0.0,
@@ -25,12 +25,7 @@ class ExpenseListController extends ExpenseBaseController {
     super.onInit();
     month.value = DateTime.now().month.toString();
     year.value = DateTime.now().year.toString();
-    listYear.addAll(
-      List.generate(
-        DateTime.now().year - 2020 + 1,
-        (index) => (2020 + index).toString(),
-      ).reversed,
-    );
+    listYear.addAll(GF.listYear());
   }
 
   @override

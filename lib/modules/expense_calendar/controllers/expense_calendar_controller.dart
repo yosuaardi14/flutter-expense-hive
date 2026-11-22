@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../../../models/expense.dart';
 import '../../../utils/constant.dart';
+import '../../../utils/global_functions.dart';
 import '../../base/controllers/expense_base_controller.dart';
 import '../../expense_detail/views/expense_detail_view.dart';
 
@@ -14,7 +15,6 @@ class ExpenseCalendarController extends ExpenseBaseController {
   final mode = "Outcome".obs;
   final month = "0".obs;
   final year = "2025".obs;
-  final listYear = <String>[];
   final selectedPayment = [...Constant.dropdownPayment].obs;
   final totalSpendMap = <String, double>{
     "Bulan ini": 0.0,
@@ -28,12 +28,7 @@ class ExpenseCalendarController extends ExpenseBaseController {
     month.value = DateTime.now().month.toString();
     year.value = DateTime.now().year.toString();
     startWeekDay.value = DateTime.now().weekday;
-    listYear.addAll(
-      List.generate(
-        DateTime.now().year - 2020 + 1,
-        (index) => (2020 + index).toString(),
-      ).reversed,
-    );
+    listYear.addAll(GF.listYear());
   }
 
   @override

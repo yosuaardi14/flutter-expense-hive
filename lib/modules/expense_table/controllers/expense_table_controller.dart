@@ -2,10 +2,10 @@ import 'package:get/get.dart';
 
 import '../../../models/expense.dart';
 import '../../../utils/constant.dart';
+import '../../../utils/global_functions.dart';
 import '../../base/controllers/expense_base_controller.dart';
 
 class ExpenseTableController extends ExpenseBaseController {
-  final listYear = <String>[];
   // final type = Constant.dropdownType[1].obs;
   // final payment = Constant.dropdownPayment[0].obs;
   final daysInMonth = 28.obs;
@@ -19,12 +19,7 @@ class ExpenseTableController extends ExpenseBaseController {
     super.onInit();
     month.value = DateTime.now().month.toString();
     year.value = DateTime.now().year.toString();
-    listYear.addAll(
-      List.generate(
-        DateTime.now().year - 2020 + 1,
-        (index) => (2020 + index).toString(),
-      ).reversed,
-    );
+    listYear.addAll(GF.listYear());
   }
 
   @override
@@ -57,7 +52,8 @@ class ExpenseTableController extends ExpenseBaseController {
   }
 
   double totalSpendByDay(int day) {
-    List<Expense>? data = expenseData["$day-${month.value}-${year.value}"];
+    List<Expense>? data =
+        expenseData["${day.toString().padLeft(2, "0")}-${month.value}-${year.value}"];
     if (data == null) return 0.0;
     return data.fold(0.0, (sum, item) => sum + item.amount);
   }
