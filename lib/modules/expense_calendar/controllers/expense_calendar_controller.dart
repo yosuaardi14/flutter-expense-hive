@@ -12,7 +12,7 @@ class ExpenseCalendarController extends ExpenseBaseController {
   // final payment = Constant.dropdownPayment[0].obs;
   final startWeekDay = 0.obs;
   final sisaWeekDay = 0.obs;
-  final mode = "Outcome".obs;
+  final mode = Constant.outcome.obs;
   final month = "0".obs;
   final year = "2025".obs;
   final selectedPayment = [...Constant.dropdownPayment].obs;
@@ -36,10 +36,12 @@ class ExpenseCalendarController extends ExpenseBaseController {
     listData();
   }
 
-  void listData() async {
+  Future<void> listData() async {
     listExpense.value = await expenseService.fetchListFilterData(
-      mode.value == "Outcome",
-      type.value != "Semua" && mode.value == "Outcome" ? type.value : null,
+      mode.value == Constant.outcome,
+      type.value != Constant.semua && mode.value == Constant.outcome
+          ? type.value
+          : null,
       selectedPayment,
       DateTime(int.parse(year.value), int.parse(month.value), 1),
       DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
@@ -48,17 +50,17 @@ class ExpenseCalendarController extends ExpenseBaseController {
     final now = DateTime.now();
     totalSpendMap.value = {
       "Bulan ini": await expenseService.sumRange(
-        mode.value == "Outcome",
+        mode.value == Constant.outcome,
         DateTime(int.parse(year.value), int.parse(month.value), 1),
         DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
       ),
       "Bulan lalu": await expenseService.sumRange(
-        mode.value == "Outcome",
+        mode.value == Constant.outcome,
         DateTime(now.year, now.month - 1, 1),
         DateTime(now.year, now.month, 1),
       ),
       "Tahun ini": await expenseService.sumRange(
-        mode.value == "Outcome",
+        mode.value == Constant.outcome,
         DateTime(now.year, 1, 1),
         DateTime(now.year + 1, 1, 1),
       ),

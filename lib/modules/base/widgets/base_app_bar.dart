@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../utils/constant.dart';
+
 class BaseAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String titleText;
   final Widget? title;
@@ -11,7 +13,7 @@ class BaseAppBar extends StatelessWidget implements PreferredSizeWidget {
   const BaseAppBar({
     super.key,
     this.centerTitle = true,
-    this.titleText = "Expense",
+    this.titleText = Constant.expense,
     this.title,
     this.actions,
     this.postFixtitleText = "",

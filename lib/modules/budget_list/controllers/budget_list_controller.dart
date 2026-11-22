@@ -25,7 +25,7 @@ class BudgetListController extends ExpenseBaseController {
     listData();
   }
 
-  void listData() async {
+  Future<void> listData() async {
     currentListBudget.value = await budgetService.fetchListFilterDataBudget(
       null,
       null,

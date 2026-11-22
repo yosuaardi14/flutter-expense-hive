@@ -33,7 +33,7 @@ class ExpenseAddController extends ExpenseBaseController {
       Map<String, dynamic> data = {
         "title": titleController.text,
         "amount": amountController.text,
-        "type": isExpense.value ? typeValue.value : "Pemasukan",
+        "type": isExpense.value ? typeValue.value : Constant.pemasukan,
         "payment": isExpense.value ? paymentValue.value : incomeFromValue.value,
         "date": selectedDate.toString(),
         "id": DateTime.now().toString(),
@@ -45,7 +45,7 @@ class ExpenseAddController extends ExpenseBaseController {
       Map<String, dynamic> data = {
         "title": titleController.text,
         "amount": amountController.text,
-        "type": isExpense.value ? typeValue.value : "Pemasukan",
+        "type": isExpense.value ? typeValue.value : Constant.pemasukan,
         "payment": isExpense.value ? paymentValue.value : incomeFromValue.value,
         "date": selectedDate.toString(),
         "id": DateTime.now().toString(),
@@ -60,7 +60,7 @@ class ExpenseAddController extends ExpenseBaseController {
     if (data == null) {
       return;
     }
-    isExpense.value = data.type != "Pemasukan";
+    isExpense.value = data.type != Constant.pemasukan;
     titleController.text = data.title;
     amountController.text = data.amount.toString().replaceAll(".0", "");
     typeValue.value = data.type;
@@ -77,7 +77,7 @@ class ExpenseAddController extends ExpenseBaseController {
     Map<String, dynamic> data = {
       "title": titleController.text,
       "amount": amountController.text,
-      "type": isExpense.value ? typeValue.value : "Pemasukan",
+      "type": isExpense.value ? typeValue.value : Constant.pemasukan,
       "payment": isExpense.value ? paymentValue.value : incomeFromValue.value,
       "date": selectedDate.value.toString(),
       "id": DateTime.now().toString(),
@@ -103,7 +103,7 @@ class ExpenseAddController extends ExpenseBaseController {
     if (isExpense) {
       typeValue.value = Constant.dropdownType[1];
     } else {
-      typeValue.value = "Pemasukan";
+      typeValue.value = Constant.pemasukan;
     }
   }
 }

@@ -15,7 +15,7 @@ class BudgetListView extends GetView<BudgetListController> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: () async => controller.listData(),
+      onRefresh: controller.listData,
       child: Scaffold(
         appBar: BaseAppBar(
           titleText: "Budget App - List",
@@ -123,7 +123,7 @@ class BudgetListView extends GetView<BudgetListController> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    e.period == "Per Hari"
+                                    e.period == Constant.perHari
                                         ? Constant.hari[e.param - 1]
                                         : "Minggu ${e.param}",
                                   ),

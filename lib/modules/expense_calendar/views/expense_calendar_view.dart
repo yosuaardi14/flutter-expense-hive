@@ -32,7 +32,7 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
       ),
       drawer: const BaseDrawer(),
       body: RefreshIndicator(
-        onRefresh: () async => controller.listData(),
+      onRefresh: controller.listData,
         child: Column(
           children: [
             Padding(
@@ -43,7 +43,7 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                   Obx(() {
                     final modeValue = controller.mode.value;
                     final typeValue = controller.type.value;
-                    bool showTypeFilter = modeValue == "Outcome";
+                    bool showTypeFilter = modeValue == Constant.outcome;
                     return ModeTypeFilter(
                       modeValue: modeValue,
                       typeValue: typeValue,

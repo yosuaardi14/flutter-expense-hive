@@ -40,7 +40,7 @@ class _ExpenseAddViewState extends State<ExpenseAddView> {
     super.dispose();
   }
 
-  void _submitData() async {
+  Future<void> _submitData() async {
     if (controller.amountController.text.isEmpty) {
       return;
     }
@@ -92,9 +92,9 @@ class _ExpenseAddViewState extends State<ExpenseAddView> {
                     ? [
                         switchButton(),
                         DropdownButtonFormField<String>(
-                          initialValue: "Pemasukan",
+                          initialValue: Constant.pemasukan,
                           items: [
-                            ...["Pemasukan"].map(
+                            ...[Constant.pemasukan].map(
                               (e) => DropdownMenuItem<String>(
                                 value: e,
                                 child: Text(e),
@@ -108,7 +108,7 @@ class _ExpenseAddViewState extends State<ExpenseAddView> {
                             controller.typeValue.value = val!;
                           },
                           onSaved: (newValue) {
-                            controller.typeValue.value = "Pemasukan";
+                            controller.typeValue.value = Constant.pemasukan;
                           },
                         ),
                         TextField(
@@ -285,9 +285,9 @@ class _ExpenseAddViewState extends State<ExpenseAddView> {
       final isExpense = controller.isExpense.value;
       return Row(
         children: [
-          Expanded(child: tabButton(isExpense, "Pengeluaran")),
+          Expanded(child: tabButton(isExpense, Constant.pengeluaran)),
           const SizedBox(width: 10),
-          Expanded(child: tabButton(!isExpense, "Pemasukan")),
+          Expanded(child: tabButton(!isExpense, Constant.pemasukan)),
         ],
       );
     });

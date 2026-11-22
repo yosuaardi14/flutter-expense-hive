@@ -40,7 +40,7 @@ class _BudgetAddViewState extends State<BudgetAddView> {
     super.dispose();
   }
 
-  void _submitData() async {
+  Future<void> _submitData() async {
     if (controller.amountController.text.isEmpty) {
       return;
     }
@@ -114,6 +114,7 @@ class _BudgetAddViewState extends State<BudgetAddView> {
                     decoration: const InputDecoration(labelText: 'Periode'),
                     onChanged: (val) {
                       controller.period.value = val!;
+                      controller.clearChildrenController();
                       // controller.calculateDayInMonth();
                     },
                   ),
@@ -126,17 +127,17 @@ class _BudgetAddViewState extends State<BudgetAddView> {
                   controller: controller.amountController,
                   keyboardType: TextInputType.number,
                 ),
-                // if (controller.period.value == "Per Hari" ||
-                //     controller.period.value == "Per Minggu")
+                // if (controller.period.value == Constant.perHari ||
+                //     controller.period.value == Constant.perMinggu)
                 //   Row(
                 //     children: [
                 //       Text("Aturan Khusus"),
                 //       IconButton(
                 //         onPressed: () {
-                //           if (controller.period.value == "Per Hari") {
+                //           if (controller.period.value == Constant.perHari) {
                 //             controller.dayAmounts.addEntries({});
                 //           } else if (controller.period.value ==
-                //               "Per Minggu") {
+                //               Constant.perMinggu) {
                 //             controller.weekAmounts.addEntries({
                 //               "1": 10.00
                 //             }.entries);
@@ -148,7 +149,7 @@ class _BudgetAddViewState extends State<BudgetAddView> {
                 //     ],
                 //   ),
                 Obx(() {
-                  if (controller.period.value == "Per Hari") {
+                  if (controller.period.value == Constant.perHari) {
                     return Column(
                       children: [
                         ...List.generate(Constant.hari.length, (index) {
@@ -212,7 +213,7 @@ class _BudgetAddViewState extends State<BudgetAddView> {
                   return const SizedBox.shrink();
                 }),
                 Obx(() {
-                  if (controller.period.value == "Per Minggu") {
+                  if (controller.period.value == Constant.perMinggu) {
                     return Column(
                       children: [
                         ...List.generate(controller.weekList.length, (index) {

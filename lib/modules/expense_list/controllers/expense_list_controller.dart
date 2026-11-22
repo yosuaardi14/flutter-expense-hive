@@ -7,7 +7,7 @@ import '../../base/controllers/expense_base_controller.dart';
 
 class ExpenseListController extends ExpenseBaseController {
   final type = Constant.dropdownType[0].obs;
-  final mode = "Outcome".obs;
+  final mode = Constant.outcome.obs;
   final month = "0".obs;
   final year = "2026".obs;
   final selectedPayment = [...Constant.dropdownPayment].obs;
@@ -34,10 +34,10 @@ class ExpenseListController extends ExpenseBaseController {
     listData();
   }
 
-  void listData() async {
+  Future<void> listData() async {
     listExpense.value = await expenseService.fetchListFilterData(
-      mode.value == "Outcome",
-      type.value != "Semua" ? type.value : null,
+      mode.value == Constant.outcome,
+      type.value != Constant.semua ? type.value : null,
       selectedPayment,
       DateTime(int.parse(year.value), int.parse(month.value), 1),
       DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
@@ -56,27 +56,27 @@ class ExpenseListController extends ExpenseBaseController {
 
     totalSpendMap.value = {
       "Hari ini": await expenseService.sumRange(
-        mode.value == "Outcome",
+        mode.value == Constant.outcome,
         now,
         now.add(Duration(days: 1)),
       ),
       "Minggu ini": await expenseService.sumRange(
-        mode.value == "Outcome",
+        mode.value == Constant.outcome,
         startOfWeek,
         endOfWeek,
       ),
       "Bulan ini": await expenseService.sumRange(
-        mode.value == "Outcome",
+        mode.value == Constant.outcome,
         DateTime(now.year, now.month, 1),
         DateTime(now.year, now.month + 1),
       ),
       "Bulan lalu": await expenseService.sumRange(
-        mode.value == "Outcome",
+        mode.value == Constant.outcome,
         DateTime(now.year, now.month - 1, 1),
         DateTime(now.year, now.month, 1),
       ),
       "Tahun ini": await expenseService.sumRange(
-        mode.value == "Outcome",
+        mode.value == Constant.outcome,
         DateTime(now.year, 1, 1),
         DateTime(now.year + 1, 1, 1),
       ),
@@ -85,7 +85,7 @@ class ExpenseListController extends ExpenseBaseController {
     groupByDate(listExpense, expenseData);
   }
 
-  void deleteData(String id) async {
+  Future<void> deleteData(String id) async {
     await expenseService.deleteData(id);
     listData();
   }

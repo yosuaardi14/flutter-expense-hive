@@ -13,7 +13,7 @@ class BudgetAddController extends ExpenseBaseController {
 
   final month = "0".obs;
   final year = "2024".obs;
-  final period = "Per Bulan".obs;
+  final period = Constant.perBulan.obs;
 
   final weekList = <int>[].obs;
 
@@ -68,123 +68,78 @@ class BudgetAddController extends ExpenseBaseController {
   }
 
   Future<void> insertData() async {
-    if (id.value != "") {
-      String parentid = "${typeValue.value}_${month.value}_${year.value}_0";
-      Map<String, dynamic> data = {
-        "month": month.value,
-        "year": year.value,
-        "amount": amountController.text,
-        "type": typeValue.value,
-        "period": period.value,
-        "param": 0,
-        "parentid": null,
-        "id": parentid,
-      };
-      await budgetService.updateDataBudget(id.value, data);
-      if (childrenBudget.isNotEmpty) {
-        for (var i = 0; i < childrenBudget.length; i++) {
-          await budgetService.deleteDataBudget(childrenBudget[i].id);
-        }
+    final isEdit = id.value.isNotEmpty;
+    final parentid = "${typeValue.value}_${month.value}_${year.value}_0";
+
+    // Sama untuk tambah maupun edit
+    final parentData = <String, dynamic>{
+      "month": month.value,
+      "year": year.value,
+      "amount": amountController.text,
+      "type": typeValue.value,
+      "period": period.value,
+      "param": 0,
+      "parentid": null,
+      "id": parentid,
+    };
+
+    if (isEdit) {
+      // Beda hanya di sini: update parent + hapus children lama
+      await budgetService.updateDataBudget(id.value, parentData);
+      for (final child in childrenBudget) {
+        await budgetService.deleteDataBudget(child.id);
       }
-      if (period.value == "Per Hari") {
-        for (var i = 0; i < dayAmounts.length; i++) {
-          MapEntry<int, String?> entry = dayAmounts.entries.elementAt(i);
-          if (double.tryParse(entry.value.toString()) == null) {
-            continue;
-          }
-          String elementId =
-              "${typeValue.value}_${month.value}_${year.value}_${entry.key}";
-          Map<String, dynamic> childData = {
-            "month": month.value,
-            "year": year.value,
-            "amount": entry.value,
-            "type": typeValue.value,
-            "period": period.value,
-            "param": entry.key,
-            "parentid": parentid,
-            "id": elementId,
-          };
-          await budgetService.insertDataBudget(childData);
-        }
-      } else if (period.value == "Per Minggu") {
-        for (var i = 0; i < weekList.length; i++) {
-          if (weekAmounts.containsKey(weekList[i]) &&
-              (double.tryParse(weekAmounts[weekList[i]].toString()) != null)) {
-            String elementId =
-                "${typeValue.value}_${month.value}_${year.value}_${weekList[i]}";
-            Map<String, dynamic> childData = {
-              "month": month.value,
-              "year": year.value,
-              "amount": weekAmounts[weekList[i]],
-              "type": typeValue.value,
-              "period": period.value,
-              "param": weekList[i],
-              "parentid": parentid,
-              "id": elementId,
-            };
-            await budgetService.insertDataBudget(childData);
-          }
-        }
-      }
-      // resetForm();
     } else {
-      String parentid = "${typeValue.value}_${month.value}_${year.value}_0";
-      Map<String, dynamic> data = {
-        "month": month.value,
-        "year": year.value,
-        "amount": amountController.text,
-        "type": typeValue.value,
-        "period": period.value,
-        "param": 0,
-        "parentid": null,
-        "id": parentid,
-      };
-      await budgetService.insertDataBudget(data);
-      if (period.value == "Per Hari") {
-        for (var i = 0; i < dayAmounts.length; i++) {
-          MapEntry<int, String?> entry = dayAmounts.entries.elementAt(i);
-          if (double.tryParse(entry.value.toString()) == null) {
-            continue;
-          }
-          String elementId =
-              "${typeValue.value}_${month.value}_${year.value}_${entry.key}";
-          Map<String, dynamic> childData = {
-            "month": month.value,
-            "year": year.value,
-            "amount": entry.value,
-            "type": typeValue.value,
-            "period": period.value,
-            "param": entry.key,
-            "parentid": parentid,
-            "id": elementId,
-          };
-          await budgetService.insertDataBudget(childData);
-        }
-      } else if (period.value == "Per Minggu") {
-        for (var i = 0; i < weekList.length; i++) {
-          if (weekAmounts.containsKey(weekList[i]) &&
-              (double.tryParse(weekAmounts[weekList[i]].toString()) != null)) {
-            String elementId =
-                "${typeValue.value}_${month.value}_${year.value}_${weekList[i]}";
-            Map<String, dynamic> childData = {
-              "month": month.value,
-              "year": year.value,
-              "amount": weekAmounts[weekList[i]],
-              "type": typeValue.value,
-              "period": period.value,
-              "param": weekList[i],
-              "parentid": parentid,
-              "id": elementId,
-            };
-            await budgetService.insertDataBudget(childData);
-          }
-        }
+      await budgetService.insertDataBudget(parentData);
+    }
+
+    // Anak baru: identik untuk kedua cabang
+    await _insertChildren(parentid);
+  }
+
+  Future<void> _insertChildren(String parentid) async {
+    if (period.value == Constant.perHari) {
+      for (final entry in dayAmounts.entries) {
+        if (double.tryParse(entry.value.toString()) == null) continue;
+        await budgetService.insertDataBudget(
+          _buildChildData(
+            parentid: parentid,
+            param: entry.key,
+            amount: entry.value,
+          ),
+        );
       }
-      // resetForm();
+    } else if (period.value == Constant.perMinggu) {
+      for (final week in weekList) {
+        final amount = weekAmounts[week];
+        if (amount == null || double.tryParse(amount.toString()) == null) {
+          continue;
+        }
+        await budgetService.insertDataBudget(
+          _buildChildData(parentid: parentid, param: week, amount: amount),
+        );
+      }
     }
   }
 
-  void detailData(String id) async {
+  Map<String, dynamic> _buildChildData({
+    required String parentid,
+    required int param,
+    required String? amount,
+  }) {
+    return {
+      "month": month.value,
+      "year": year.value,
+      "amount": amount,
+      "type": typeValue.value,
+      "period": period.value,
+      "param": param,
+      "parentid": parentid,
+      "id": "${typeValue.value}_${month.value}_${year.value}_$param",
+    };
+  }
+
+  Future<void> detailData(String id) async {
     Budget? data = await budgetService.fetchDataBudget(id, withChildren: true);
     if (data == null) {
       return;
@@ -195,7 +150,7 @@ class BudgetAddController extends ExpenseBaseController {
     childrenBudget.value = data.children;
     month.value = data.month.toString();
     year.value = data.year.toString();
-    if (period.value == "Per Hari") {
+    if (period.value == Constant.perHari) {
       for (var i = 0; i < data.children.length; i++) {
         amountsChildrenController[data.children[i].param - 1].text = data
             .children[i]
@@ -206,7 +161,7 @@ class BudgetAddController extends ExpenseBaseController {
             .toString()
             .replaceAll(".0", "");
       }
-    } else if (period.value == "Per Minggu") {
+    } else if (period.value == Constant.perMinggu) {
       for (var i = 0; i < data.children.length; i++) {
         amountsChildrenController[data.children[i].param - 1].text = data
             .children[i]
@@ -233,5 +188,12 @@ class BudgetAddController extends ExpenseBaseController {
   void resetForm() {
     amountController.clear();
     id("");
+    clearChildrenController();
+  }
+
+  void clearChildrenController() {
+    for (var controller in amountsChildrenController) {
+      controller.clear();
+    }
   }
 }

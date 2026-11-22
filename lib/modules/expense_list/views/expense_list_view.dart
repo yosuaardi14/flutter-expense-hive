@@ -17,12 +17,10 @@ class ExpenseListView extends GetView<ExpenseListController> {
   const ExpenseListView({super.key});
 
   void addExpense() {
-    // Get.put(ExpenseAddController())
-    //     .resetForm(controller.mode.value == "Outcome");
     Get.bottomSheet(
       const ExpenseAddView(),
       settings: RouteSettings(
-        arguments: {"isExpense": controller.mode.value == "Outcome"},
+        arguments: {"isExpense": controller.mode.value == Constant.outcome},
       ),
     ).then((value) {
       controller.listData();
@@ -53,7 +51,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: RefreshIndicator(
-        onRefresh: () async => controller.listData(),
+        onRefresh: controller.listData,
         child: Column(
           children: [
             Padding(
@@ -63,7 +61,7 @@ class ExpenseListView extends GetView<ExpenseListController> {
                   Obx(() {
                     final modeValue = controller.mode.value;
                     final typeValue = controller.type.value;
-                    bool showTypeFilter = modeValue == "Outcome";
+                    bool showTypeFilter = modeValue == Constant.outcome;
                     return ModeTypeFilter(
                       modeValue: modeValue,
                       typeValue: typeValue,
@@ -248,7 +246,7 @@ class ItemData extends GetView<ExpenseListController> {
     });
   }
 
-  void deleteData() async {
+  Future<void> deleteData() async {
     bool hapus = await GF.showConfirmationDeleteDialog();
     if (hapus) {
       controller.deleteData(data.id);

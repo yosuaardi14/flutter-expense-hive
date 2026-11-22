@@ -15,7 +15,7 @@ class BudgetDashboardView extends GetView<BudgetDashboardController> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: () async => controller.listData(),
+      onRefresh: controller.listData,
       child: Obx(() {
         int tabIdx = controller.tabIndex.value;
         return DefaultTabController(
