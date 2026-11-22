@@ -27,7 +27,7 @@ class ExpenseTableController extends ExpenseBaseController {
     listData();
   }
 
-  void listData() async {
+  Future<void> listData() async {
     listExpense.value = await expenseService.fetchListFilterData(
       null,
       null,
@@ -77,7 +77,7 @@ class ExpenseTableController extends ExpenseBaseController {
       List<Expense> listExpense = item.value;
       for (var i = 0; i < listExpense.length; i++) {
         Expense expense = item.value[i];
-        if (expense.type == "Pemasukan") {
+        if (expense.type == Constant.pemasukan) {
           totalIncome += expense.amount;
           totalIncomePerDay += expense.amount;
         } else {
@@ -90,8 +90,8 @@ class ExpenseTableController extends ExpenseBaseController {
           "day": i == 0 ? item.key.split("-")[0] : "",
           "isLast": i == listExpense.length - 1,
           "title": expense.title,
-          "income": expense.type == "Pemasukan" ? expense.amount : 0.0,
-          "outcome": expense.type != "Pemasukan" ? expense.amount : 0.0,
+          "income": expense.type == Constant.pemasukan ? expense.amount : 0.0,
+          "outcome": expense.type != Constant.pemasukan ? expense.amount : 0.0,
           "totalIncome": totalIncome,
           "totalOutcome": totalOutcome,
           "totalSisa": totalSisa,

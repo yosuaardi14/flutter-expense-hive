@@ -1,8 +1,10 @@
-import 'package:flutter_expense_app/core/interfaces/crud_service.dart';
-import 'package:flutter_expense_app/models/expense.dart';
-import 'package:flutter_expense_app/services/hive_database.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+import '../core/interfaces/crud_service.dart';
+import '../models/expense.dart';
+import '../utils/constant.dart';
+import 'hive_database.dart';
 
 class HiveExpenseService extends GetxService implements ExpenseCrudService {
   final HiveDatabase appDb = Get.find();
@@ -81,8 +83,8 @@ class HiveExpenseService extends GetxService implements ExpenseCrudService {
     final expenses = await fetchListData();
 
     return expenses.where((e) {
-      if (isExpense == true && e.type == "Pemasukan") return false;
-      if (isExpense == false && e.type != "Pemasukan") return false;
+      if (isExpense == true && e.type == Constant.pemasukan) return false;
+      if (isExpense == false && e.type != Constant.pemasukan) return false;
       if (type != null && e.type != type) return false;
       if (payment != null && !payment.contains(e.payment)) return false;
       if (dateStart != null && e.date.isBefore(dateStart)) return false;
@@ -101,8 +103,8 @@ class HiveExpenseService extends GetxService implements ExpenseCrudService {
     final expenses = await fetchListData();
     return expenses
         .where((e) {
-          if (isExpense == true && e.type == "Pemasukan") return false;
-          if (isExpense == false && e.type != "Pemasukan") return false;
+          if (isExpense == true && e.type == Constant.pemasukan) return false;
+          if (isExpense == false && e.type != Constant.pemasukan) return false;
           if (dateStart != null && e.date.isBefore(dateStart)) return false;
           if (dateEnd != null && !e.date.isBefore(dateEnd)) return false;
           // return (e.date.isBefore(dateStart) || e.date.isAfter(dateEnd));

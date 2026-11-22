@@ -5,6 +5,8 @@ import 'package:flutter_expense_app/modules/home/controllers/home_controller.dar
 import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:get/get.dart';
 
+import '../../../utils/constant.dart';
+
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
@@ -45,8 +47,8 @@ class HomeView extends GetView<HomeController> {
                             children: [
                               Text(e.key),
                               switch (e.key) {
-                                "Income" => Icon(Icons.arrow_downward),
-                                "Expense" => Icon(Icons.arrow_upward),
+                                Constant.income => Icon(Icons.arrow_downward),
+                                Constant.expense => Icon(Icons.arrow_upward),
                                 _ => Icon(Icons.account_balance_wallet),
                               },
                               Text(GF.rupiahFormat(e.value, symbol: "Rp")),

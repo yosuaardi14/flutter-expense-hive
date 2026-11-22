@@ -1,32 +1,33 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_expense_app/models/budget.dart';
-import 'package:flutter_expense_app/models/expense.dart';
-import 'package:flutter_expense_app/modules/base/controllers/expense_base_controller.dart';
-import 'package:flutter_expense_app/utils/csv_util.dart';
-import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:get/get.dart';
 
-import 'import_dialog.dart';
+import '../../../models/budget.dart';
+import '../../../models/expense.dart';
+import '../../../utils/constant.dart';
+import '../../../utils/csv_util.dart';
+import '../../../utils/global_functions.dart';
+import '../../base/controllers/expense_base_controller.dart';
+import '../local_widgets/import_dialog.dart';
 
 class SettingController extends ExpenseBaseController {
   final file = Rx<PlatformFile?>(null);
   final fileController = TextEditingController();
-  final importMode = "Merge".obs;
+  final importMode = Constant.importModeMerge.obs;
 
-  void exportToCSV() async {
+  Future<void> exportToCSV() async {
     listExpense.value = await expenseService.fetchListData(reload: true);
     List<List<dynamic>> data = [...listExpense.map((e) => e.toList())];
-    await CsvUtil.export(data, type: "EXPENSE");
+    await CsvUtil.export(data, type: Constant.expense);
   }
 
-  void exportBudgetToCSV() async {
+  Future<void> exportBudgetToCSV() async {
     listBudget.value = await budgetService.fetchListDataBudget(reload: true);
     List<List<dynamic>> data = [...listBudget.map((e) => e.toList())];
-    await CsvUtil.export(data, type: "BUDGET");
+    await CsvUtil.export(data, type: Constant.budget);
   }
 
-  void onClickImport() async {
+  Future<void> onClickImport() async {
     final bytes = await file.value?.readAsBytes();
     if (bytes != null) {
       Get.back(result: CsvUtil.import(bytes));
@@ -36,10 +37,10 @@ class SettingController extends ExpenseBaseController {
   }
 
   void onChangedImportMode(String? val) {
-    importMode.value = val ?? "Merge";
+    importMode.value = val ?? Constant.importModeMerge;
   }
 
-  void onChooseFile() async {
+  Future<void> onChooseFile() async {
     final result = await FilePicker.pickFile(
       androidOptions: AndroidOptions(),
       webOptions: WebOptions(),
@@ -88,7 +89,7 @@ class SettingController extends ExpenseBaseController {
       int counter = 0;
       final mode = importMode.value;
 
-      if (mode == "Replace") {
+      if (mode == Constant.importModeReplace) {
         await deleteAll();
       }
 
@@ -99,7 +100,7 @@ class SettingController extends ExpenseBaseController {
         final id = getId(item);
 
         switch (mode) {
-          case "Insert":
+          case Constant.importModeInsert:
             setId(
               item,
               DateTime.now().toString(),
@@ -108,19 +109,19 @@ class SettingController extends ExpenseBaseController {
             counter++;
             break;
 
-          case "Merge":
+          case Constant.importModeMerge:
             if (await fetch(id) == null) {
               await insert(toMap(item));
               counter++;
             }
             break;
 
-          case "Replace":
+          case Constant.importModeReplace:
             await insert(toMap(item));
             counter++;
             break;
 
-          case "Update":
+          case Constant.importModeUpdate:
             if (await fetch(id) != null) {
               await update(id, toMap(item));
             } else {
@@ -142,13 +143,13 @@ class SettingController extends ExpenseBaseController {
     }
   }
 
-  void importFromCSV() async {
+  Future<void> importFromCSV() async {
     resetForm();
     final rows = await Get.bottomSheet<List<List<dynamic>>?>(
       const ImportDialog(),
     );
     await _importCsv<Expense>(
-      label: "Expense",
+      label: Constant.expense,
       rows: rows,
       expectedLength: Expense.props().length,
       fromList: Expense.fromList,
@@ -162,13 +163,13 @@ class SettingController extends ExpenseBaseController {
     );
   }
 
-  void importBudgetFromCSV() async {
+  Future<void> importBudgetFromCSV() async {
     resetForm();
     final rows = await Get.bottomSheet<List<List<dynamic>>?>(
       const ImportDialog(),
     );
     await _importCsv<Budget>(
-      label: "Budget",
+      label: Constant.budget,
       rows: rows,
       expectedLength: Budget.props().length,
       fromList: Budget.fromList,
@@ -182,7 +183,7 @@ class SettingController extends ExpenseBaseController {
     );
   }
 
-  void resetData() async {
+  Future<void> resetData() async {
     final result = await GF.showConfirmationDeleteDialog(
       message: "Apakah Anda yakin ingin menghapus semua data Expense?",
     );
@@ -199,7 +200,7 @@ class SettingController extends ExpenseBaseController {
     }
   }
 
-  void resetDataBudget() async {
+  Future<void> resetDataBudget() async {
     final result = await GF.showConfirmationDeleteDialog(
       message: "Apakah Anda yakin ingin menghapus semua data Budget?",
     );
@@ -216,7 +217,7 @@ class SettingController extends ExpenseBaseController {
     }
   }
 
-  void resetDataRange() async {
+  Future<void> resetDataRange() async {
     final dateRange = await showDateRangePicker(
       context: Get.context!,
       firstDate: DateTime(1800),
@@ -250,7 +251,7 @@ class SettingController extends ExpenseBaseController {
   void resetForm() {
     file.value = null;
     fileController.clear();
-    importMode.value = "Merge";
+    importMode.value = Constant.importModeMerge;
   }
 
   @override

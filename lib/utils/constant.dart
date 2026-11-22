@@ -1,6 +1,21 @@
 class Constant {
+  static const String semua = "Semua";
+  static const String perHari = "Per Hari";
+  static const String perMinggu = "Per Minggu";
+  static const String perBulan = "Per Bulan";
+  static const String expense = "Expense";
+  static const String budget = "Budget";
+  static const String outcome = "Outcome";
+  static const String income = "Income";
+  static const String pengeluaran = "Pengeluaran";
+  static const String pemasukan = "Pemasukan";
+  static const String importModeMerge = "Merge";
+  static const String importModeInsert = "Insert";
+  static const String importModeReplace = "Replace";
+  static const String importModeUpdate = "Update";
+
   static const Map<String, String> dropdownMonth = {
-    "0": "Semua",
+    "0": semua,
     "1": "Januari",
     "2": "Februari",
     "3": "Maret",
@@ -30,7 +45,7 @@ class Constant {
   };
 
   static const List<String> dropdownType = [
-    "Semua",
+    semua,
     "Makan",
     "Minum",
     "Kebutuhan", // Belanja Pokok
@@ -46,11 +61,11 @@ class Constant {
   ];
 
   static List<String> dropdownTypeOnly = [
-    ...List<String>.from(dropdownType).sublist(1),
+    ...List.unmodifiable(dropdownType.sublist(1)),
   ];
 
   static const List<String> dropdownPayment = [
-    "Semua",
+    semua,
     "Tunai",
     "GoPay",
     "OVO",
@@ -59,11 +74,11 @@ class Constant {
     "Lainnya",
   ];
 
-  static const List<String> mode = ["Outcome", "Income"];
+  static const List<String> mode = [outcome, income];
 
   static const List<String> dropdownBudgetPeriod = [
-    "Per Hari",
-    "Per Minggu",
-    "Per Bulan",
+    perHari,
+    perMinggu,
+    perBulan,
   ];
 }

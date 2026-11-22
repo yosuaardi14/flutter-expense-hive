@@ -38,7 +38,7 @@ class ExpenseTableView extends GetView<ExpenseTableController> {
       ),
       drawer: const BaseDrawer(),
       body: RefreshIndicator(
-        onRefresh: () async => controller.listData(),
+        onRefresh: controller.listData,
         child: Column(
           children: [
             Padding(

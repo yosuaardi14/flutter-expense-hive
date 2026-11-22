@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expense_app/modules/base/widgets/base_drawer.dart';
 import 'package:get/get.dart';
 
-import '../base/widgets/base_app_bar.dart' show BaseAppBar;
-import 'setting_controller.dart';
+import '../../base/widgets/base_app_bar.dart' show BaseAppBar;
+import '../controllers/setting_controller.dart';
 
 class SettingView extends GetView<SettingController> {
   const SettingView({super.key});

@@ -4,6 +4,8 @@ import 'package:flutter_expense_app/services/sqlite_database.dart';
 import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../utils/constant.dart';
+
 class SqliteExpenseService extends GetxService implements ExpenseCrudService {
   final appDb = Get.find<SqliteDatabase>();
 
@@ -83,10 +85,10 @@ class SqliteExpenseService extends GetxService implements ExpenseCrudService {
 
     if (isExpense == true) {
       conditions.add('${appDb.columnType} <> ?');
-      args.add('Pemasukan');
+      args.add(Constant.pemasukan);
     } else if (isExpense == false) {
       conditions.add('${appDb.columnType} = ?');
-      args.add('Pemasukan');
+      args.add(Constant.pemasukan);
     }
 
     if (type != null) {
@@ -131,10 +133,10 @@ class SqliteExpenseService extends GetxService implements ExpenseCrudService {
 
     if (isExpense) {
       conditions.add('${appDb.columnType} <> ?');
-      args.add('Pemasukan');
+      args.add(Constant.pemasukan);
     } else {
       conditions.add('${appDb.columnType} = ?');
-      args.add('Pemasukan');
+      args.add(Constant.pemasukan);
     }
 
     if (dateStart != null) {

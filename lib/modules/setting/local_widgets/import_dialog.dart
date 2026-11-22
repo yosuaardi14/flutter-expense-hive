@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'setting_controller.dart';
+import '../controllers/setting_controller.dart';
 
 class ImportDialog extends GetView<SettingController> {
   const ImportDialog({super.key});

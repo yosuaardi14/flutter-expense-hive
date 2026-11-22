@@ -4,6 +4,8 @@ import 'package:flutter_expense_app/modules/base/controllers/expense_base_contro
 import 'package:flutter_expense_app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
+import '../../../utils/constant.dart';
+
 class HomeController extends ExpenseBaseController {
   final totalBudgets = 0.0.obs;
   final totalExpenses = 0.0.obs;
@@ -22,7 +24,7 @@ class HomeController extends ExpenseBaseController {
     listData();
   }
 
-  void listData() async {
+  Future<void> listData() async {
     listExpense.value = await expenseService.fetchListData();
     listBudget.value = await budgetService.fetchListDataBudget();
     total["Income"] = totalExpensePerMonth(false);
@@ -37,8 +39,8 @@ class HomeController extends ExpenseBaseController {
         .where(
           (element) =>
               (isExpense
-                  ? element.type != "Pemasukan"
-                  : element.type == "Pemasukan") &&
+                  ? element.type != Constant.pemasukan
+                  : element.type == Constant.pemasukan) &&
               element.date.month == now.month &&
               element.date.year == now.year,
         )
@@ -61,7 +63,7 @@ class HomeController extends ExpenseBaseController {
       ...convertDailyAsMonthBudget(monthBudget, now),
       ...convertWeekAsMonthBudget(monthBudget),
       ...monthBudget.where(
-        (e) => e.parentid == null && e.period == "Per Bulan",
+        (e) => e.parentid == null && e.period == Constant.perBulan,
       ),
     ];
     return totalAmount(currentMonthBudget);
@@ -73,7 +75,8 @@ class HomeController extends ExpenseBaseController {
   ) {
     List<Budget> result = source
         .where(
-          (element) => element.parentid == null && element.period == "Per Hari",
+          (element) =>
+              element.parentid == null && element.period == Constant.perHari,
         )
         .map((e) {
           List<Budget> children = listBudget
@@ -105,7 +108,7 @@ class HomeController extends ExpenseBaseController {
     List<Budget> result = source
         .where(
           (element) =>
-              element.parentid == null && element.period == "Per Minggu",
+              element.parentid == null && element.period == Constant.perMinggu,
         )
         .map((e) {
           List<Budget> children = listBudget
