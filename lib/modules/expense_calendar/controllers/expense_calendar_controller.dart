@@ -1,20 +1,20 @@
-import 'package:flutter_expense_app/modules/expense_detail/views/expense_detail_view.dart';
 import 'package:get/get.dart';
 
 import '../../../models/expense.dart';
 import '../../../utils/constant.dart';
 import '../../base/controllers/expense_base_controller.dart';
+import '../../expense_detail/views/expense_detail_view.dart';
 
 class ExpenseCalendarController extends ExpenseBaseController {
   final daysInMonth = 28.obs;
   final type = Constant.dropdownType[0].obs;
-  final payment = Constant.dropdownPayment[0].obs;
+  // final payment = Constant.dropdownPayment[0].obs;
   final startWeekDay = 0.obs;
   final sisaWeekDay = 0.obs;
   final mode = "Outcome".obs;
   final month = "0".obs;
   final year = "2025".obs;
-  final listYear = <String>[].obs;
+  final listYear = <String>[];
   final selectedPayment = [...Constant.dropdownPayment].obs;
   final totalSpendMap = <String, double>{
     "Bulan ini": 0.0,
@@ -28,21 +28,21 @@ class ExpenseCalendarController extends ExpenseBaseController {
     month.value = DateTime.now().month.toString();
     year.value = DateTime.now().year.toString();
     startWeekDay.value = DateTime.now().weekday;
-    listYear.value = List.generate(
-      DateTime.now().year - 2020 + 1,
-      (index) => (2020 + index).toString(),
+    listYear.addAll(
+      List.generate(
+        DateTime.now().year - 2020 + 1,
+        (index) => (2020 + index).toString(),
+      ).reversed,
     );
-    listYear.value = listYear.reversed.toList();
   }
 
   @override
   void onReady() {
-    update();
+    // update();
+    listData();
   }
 
   void listData() async {
-    showLoading();
-
     listExpense.value = await expenseService.fetchListFilterData(
       mode.value == "Outcome",
       type.value != "Semua" && mode.value == "Outcome" ? type.value : null,
@@ -55,8 +55,8 @@ class ExpenseCalendarController extends ExpenseBaseController {
     totalSpendMap.value = {
       "Bulan ini": await expenseService.sumRange(
         mode.value == "Outcome",
-      DateTime(int.parse(year.value), int.parse(month.value), 1),
-      DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
+        DateTime(int.parse(year.value), int.parse(month.value), 1),
+        DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
       ),
       "Bulan lalu": await expenseService.sumRange(
         mode.value == "Outcome",
@@ -72,7 +72,6 @@ class ExpenseCalendarController extends ExpenseBaseController {
 
     calculateDayInMonth();
     groupByDate(listExpense, expenseData);
-    hideLoading();
   }
 
   void calculateDayInMonth() {

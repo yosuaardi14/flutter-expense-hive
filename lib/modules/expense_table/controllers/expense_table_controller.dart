@@ -1,16 +1,17 @@
-import 'package:flutter_expense_app/modules/base/controllers/expense_base_controller.dart';
 import 'package:get/get.dart';
+
 import '../../../models/expense.dart';
 import '../../../utils/constant.dart';
+import '../../base/controllers/expense_base_controller.dart';
 
 class ExpenseTableController extends ExpenseBaseController {
+  final listYear = <String>[];
+  // final type = Constant.dropdownType[1].obs;
+  // final payment = Constant.dropdownPayment[0].obs;
   final daysInMonth = 28.obs;
-  final type = Constant.dropdownType[1].obs;
-  final payment = Constant.dropdownPayment[0].obs;
   final tableItem = <Map<String, dynamic>>[].obs;
   final month = "0".obs;
   final year = "2025".obs;
-  final listYear = <String>[].obs;
   final selectedPayment = [...Constant.dropdownPayment].obs;
 
   @override
@@ -18,21 +19,20 @@ class ExpenseTableController extends ExpenseBaseController {
     super.onInit();
     month.value = DateTime.now().month.toString();
     year.value = DateTime.now().year.toString();
-    listYear.value = List.generate(
-      DateTime.now().year - 2020 + 1,
-      (index) => (2020 + index).toString(),
+    listYear.addAll(
+      List.generate(
+        DateTime.now().year - 2020 + 1,
+        (index) => (2020 + index).toString(),
+      ).reversed,
     );
-    listYear.value = listYear.reversed.toList();
   }
 
   @override
   void onReady() {
-    update();
+    listData();
   }
 
   void listData() async {
-    showLoading();
-
     listExpense.value = await expenseService.fetchListFilterData(
       null,
       null,
@@ -41,8 +41,6 @@ class ExpenseTableController extends ExpenseBaseController {
       DateTime(int.parse(year.value), int.parse(month.value) + 1, 1),
     );
     calculateDayInMonth();
-
-    hideLoading();
   }
 
   void calculateDayInMonth() {

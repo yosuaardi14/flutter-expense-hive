@@ -1,12 +1,15 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:get/get.dart';
 
 import '../../../utils/constant.dart';
+import '../../../utils/global_functions.dart';
 import '../../base/widgets/base_app_bar.dart';
 import '../../base/widgets/base_drawer.dart';
+import '../../base/widgets/mode_type_filter.dart';
+import '../../base/widgets/payment_filter.dart';
+import '../../base/widgets/year_month_filter.dart';
 import '../controllers/expense_calendar_controller.dart';
 
 class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
@@ -28,322 +31,184 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
         ],
       ),
       drawer: const BaseDrawer(),
-      body: GetBuilder<ExpenseCalendarController>(
-        init: controller..listData(),
-        builder: (controller) {
-          return RefreshIndicator(
-            onRefresh: () async => controller.listData(),
-            child: Column(
-              children: [
-                Padding(
+      body: RefreshIndicator(
+        onRefresh: () async => controller.listData(),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Obx(() {
+                    final modeValue = controller.mode.value;
+                    final typeValue = controller.type.value;
+                    bool showTypeFilter = modeValue == "Outcome";
+                    return ModeTypeFilter(
+                      modeValue: modeValue,
+                      typeValue: typeValue,
+                      showTypeFilter: showTypeFilter,
+                      onChangedMode: (val) {
+                        controller.mode.value = val!;
+                        controller.listData();
+                      },
+                      onChangedType: (val) {
+                        controller.type.value = val!;
+                        controller.listData();
+                      },
+                    );
+                  }),
+                  Obx(() {
+                    final yearValue = controller.year.value;
+                    final monthValue = controller.month.value;
+                    return YearMonthFilter(
+                      yearValue: yearValue,
+                      monthValue: monthValue,
+                      listYear: controller.listYear,
+                      onChangedYear: (val) {
+                        controller.year.value = val!;
+                        controller.listData();
+                      },
+                      onChangedMonth: (val) {
+                        controller.month.value = val!;
+                        controller.listData();
+                      },
+                    );
+                  }),
+                ],
+              ),
+            ),
+            Obx(() {
+              List<String> selectedPayment = controller.selectedPayment();
+              return PaymentFilter(
+                isSelected: (e) => selectedPayment.contains(e),
+                onSelected: (value, e) {
+                  if (value) {
+                    controller.selectedPayment.add(e);
+                  } else {
+                    controller.selectedPayment.remove(e);
+                  }
+                  controller.listData();
+                },
+              );
+            }),
+            Obx(() {
+              final totalMonth = controller.totalSpendMap()["Bulan ini"];
+              return Card(
+                elevation: 3,
+                child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 5,
+                    horizontal: 8,
+                    vertical: 8,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Row(
-                      //   children: [
-                      //     Expanded(
-                      //       child: DropdownButtonFormField<String>(
-                      //         value: controller.type.value,
-                      //         items: [
-                      //           ...Constant.dropdownType.map(
-                      //             (e) => DropdownMenuItem<String>(
-                      //               value: e,
-                      //               child: Text(e),
-                      //             ),
-                      //           )
-                      //         ],
-                      //         decoration:
-                      //             const InputDecoration(labelText: 'Tipe'),
-                      //         onChanged: (val) {
-                      //           controller.type.value = val!;
-                      //           controller.calculateDayInMonth();
-                      //           controller.update();
-                      //         },
-                      //       ),
-                      //     ),
-                      //     const SizedBox(width: 10),
-                      //     Expanded(
-                      //       child: DropdownButtonFormField<String>(
-                      //         value: controller.payment.value,
-                      //         items: [
-                      //           ...Constant.dropdownPayment.map(
-                      //             (e) => DropdownMenuItem<String>(
-                      //               value: e,
-                      //               child: Text(e),
-                      //             ),
-                      //           )
-                      //         ],
-                      //         decoration:
-                      //             const InputDecoration(labelText: 'Pembayaran'),
-                      //         onChanged: (val) {
-                      //           controller.payment.value = val!;
-                      //           controller.calculateDayInMonth();
-                      //           controller.update();
-                      //         },
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: controller.mode.value,
-                              items: [
-                                ...Constant.mode.map(
-                                  (e) => DropdownMenuItem<String>(
-                                    value: e,
-                                    child: Text(e),
-                                  ),
-                                ),
-                              ],
-                              decoration: const InputDecoration(
-                                labelText: 'Jenis',
-                              ),
-                              onChanged: (val) {
-                                controller.mode.value = val!;
-                                controller.update();
-                                controller.listData();
-                              },
-                            ),
-                          ),
-                          if (controller.mode.value == "Outcome") ...[
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: DropdownButtonFormField<String>(
-                                initialValue: controller.type.value,
-                                items: [
-                                  ...Constant.dropdownType.map(
-                                    (e) => DropdownMenuItem<String>(
-                                      value: e,
-                                      child: Text(e),
-                                    ),
-                                  ),
-                                ],
-                                decoration: const InputDecoration(
-                                  labelText: 'Kategori',
-                                ),
-                                onChanged: (val) {
-                                  controller.type.value = val!;
-                                  controller.update();
-                                  controller.listData();
-                                },
-                              ),
-                            ),
-                          ] else ...[
-                            // const SizedBox(width: 10),
-                            // Expanded(
-                            //   child: DropdownButtonFormField<String>(
-                            //     value: controller.payment.value,
-                            //     items: [
-                            //       ...Constant.dropdownPayment.map(
-                            //         (e) => DropdownMenuItem<String>(
-                            //           value: e,
-                            //           child: Text(e),
-                            //         ),
-                            //       ),
-                            //     ],
-                            //     decoration: const InputDecoration(
-                            //       labelText: 'Sumber',
-                            //     ),
-                            //     onChanged: (val) {
-                            //       controller.payment.value = val!;
-                            //       controller.update();
-                            //       controller.listData();
-                            //     },
-                            //   ),
-                            // ),
-                          ],
-                        ],
+                      const Text(
+                        "Total : ",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: controller.year.value,
-                              items: [
-                                ...controller.listYear.map(
-                                  (e) => DropdownMenuItem<String>(
-                                    value: e,
-                                    child: Text(e),
-                                  ),
-                                ),
-                              ],
-                              decoration: const InputDecoration(
-                                labelText: 'Tahun',
-                              ),
-                              onChanged: (val) {
-                                controller.year.value = val!;
-                                controller.update();
-                                controller.listData();
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: controller.month.value,
-                              items: [
-                                ...Constant.dropdownMonthOnly.entries.map(
-                                  (e) => DropdownMenuItem<String>(
-                                    value: e.key,
-                                    child: Text(e.value),
-                                  ),
-                                ),
-                              ],
-                              decoration: const InputDecoration(
-                                labelText: 'Bulan',
-                              ),
-                              onChanged: (val) {
-                                controller.month.value = val!;
-                                controller.update();
-                                controller.listData();
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                      Text(GF.rupiahFormat(totalMonth ?? 0.0, symbol: "Rp")),
                     ],
                   ),
                 ),
-                Builder(
-                  builder: (context) {
-                    final mediaQuery = MediaQuery.sizeOf(context);
-                    final paymentList = Constant.dropdownPayment.sublist(1);
-                    return Obx(
-                      () => Wrap(
-                        alignment: WrapAlignment.spaceBetween,
-                        spacing: 5,
-                        children: paymentList
-                            .map(
-                              (e) => ChoiceChip(
-                                selectedColor: Colors.purple,
-                                label: SizedBox(
-                                  width:
-                                      mediaQuery.width / paymentList.length -
-                                      paymentList.length * 5,
-                                  child: Text(
-                                    e,
-                                    style: const TextStyle(color: Colors.white),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                selected: controller.selectedPayment.contains(
-                                  e,
-                                ),
-                                onSelected: (value) {
-                                  if (value) {
-                                    controller.selectedPayment.add(e);
-                                  } else {
-                                    controller.selectedPayment.remove(e);
-                                  }
-                                  controller.update();
-                                  controller.listData();
-                                },
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    );
-                  },
-                ),
-                Card(
-                  elevation: 3,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Total : ",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          GF.rupiahFormat(
-                            controller.totalSpendMap()["Bulan ini"] ?? 0.0,
-                            symbol: "Rp",
+              );
+            }),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: Row(
+                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ...Constant.hari.map(
+                    (e) => Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            strokeAlign: BorderSide.strokeAlignOutside,
                           ),
+                          color: Colors.purple,
                         ),
-                      ],
+                        child: Text(
+                          e,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                // Card(
-                //   elevation: 3,
-                //   child: Padding(
-                //     padding:
-                //         const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                //     child: GetBuilder<ExpenseListController>(
-                //       builder: (c) => Column(
-                //         children: controller
-                //             .totalSpending()
-                //             .entries
-                //             .map(
-                //               (e) => Row(
-                //                 mainAxisAlignment:
-                //                     MainAxisAlignment.spaceBetween,
-                //                 children: [
-                //                   Text(
-                //                     "${e.key}: ",
-                //                     style: const TextStyle(
-                //                         fontWeight: FontWeight.bold),
-                //                   ),
-                //                   Text(rupiahFormat(e.value)),
-                //                 ],
-                //               ),
-                //             )
-                //             .toList(),
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Row(
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ...Constant.hari.map(
-                        (e) => Expanded(
-                          child: Container(
+                ],
+              ),
+            ),
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final size = MediaQuery.sizeOf(context);
+                  return Obx(() {
+                    final startWeekDay = controller.startWeekDay.value;
+                    final daysInMonth = controller.daysInMonth.value;
+                    final sisaWeekDay = controller.sisaWeekDay.value;
+                    return GridView.extent(
+                      maxCrossAxisExtent: size.width / 7,
+                      childAspectRatio:
+                          (size.width / 7) / min(size.width / 7, 75),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
+                      children: [
+                        ...List.generate(
+                          startWeekDay,
+                          (index) => Container(
                             decoration: BoxDecoration(
                               border: Border.all(
                                 strokeAlign: BorderSide.strokeAlignOutside,
                               ),
-                              color: Colors.purple,
-                            ),
-                            child: Text(
-                              e,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white),
+                              color: Colors.white,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Builder(
-                    builder: (context) {
-                      final size = MediaQuery.sizeOf(context);
-                      return GridView.extent(
-                        maxCrossAxisExtent: size.width / 7,
-                        childAspectRatio:
-                            (size.width / 7) / min(size.width / 7, 75),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 1,
-                        ),
-                        children: [
+                        ...List.generate(daysInMonth, (index) {
+                          double totalSpend = controller.totalSpendByDay(
+                            index + 1,
+                          );
+                          return InkWell(
+                            onTap: totalSpend == 0
+                                ? null
+                                : () {
+                                    controller.showDetail(index + 1);
+                                  },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  strokeAlign: BorderSide.strokeAlignOutside,
+                                ),
+                                color: Colors.white,
+                              ),
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${(index + 1)}",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  FittedBox(
+                                    child: Text(
+                                      GF.rupiahFormatPostfix(totalSpend),
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                        if (sisaWeekDay != 0)
                           ...List.generate(
-                            controller.startWeekDay.value,
+                            7 - sisaWeekDay,
                             (index) => Container(
                               decoration: BoxDecoration(
                                 border: Border.all(
@@ -353,68 +218,14 @@ class ExpenseCalendarView extends GetView<ExpenseCalendarController> {
                               ),
                             ),
                           ),
-                          ...List.generate(controller.daysInMonth.value, (
-                            index,
-                          ) {
-                            double totalSpend = controller.totalSpendByDay(
-                              index + 1,
-                            );
-                            return InkWell(
-                              onTap: totalSpend == 0
-                                  ? null
-                                  : () {
-                                      controller.showDetail(index + 1);
-                                    },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    strokeAlign: BorderSide.strokeAlignOutside,
-                                  ),
-                                  color: Colors.white,
-                                ),
-                                padding: const EdgeInsets.all(10),
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "${(index + 1)}",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    FittedBox(
-                                      child: Text(
-                                        GF.rupiahFormatPostfix(totalSpend),
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                          if (controller.sisaWeekDay.value != 0)
-                            ...List.generate(
-                              7 - controller.sisaWeekDay.value,
-                              (index) => Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    strokeAlign: BorderSide.strokeAlignOutside,
-                                  ),
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ],
+                      ],
+                    );
+                  });
+                },
+              ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }

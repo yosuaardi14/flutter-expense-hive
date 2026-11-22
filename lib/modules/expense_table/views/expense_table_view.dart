@@ -1,12 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_expense_app/modules/base/widgets/base_app_bar.dart';
-import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:get/get.dart';
 
-import '../../../utils/constant.dart';
+import '../../../utils/global_functions.dart';
+import '../../base/widgets/base_app_bar.dart';
 import '../../base/widgets/base_drawer.dart';
+import '../../base/widgets/payment_filter.dart';
+import '../../base/widgets/year_month_filter.dart';
 import '../../expense_add/controllers/expense_add_controller.dart';
 import '../../expense_add/views/expense_add_view.dart';
 import '../controllers/expense_table_controller.dart';
@@ -37,300 +38,175 @@ class ExpenseTableView extends GetView<ExpenseTableController> {
         ],
       ),
       drawer: const BaseDrawer(),
-      body: GetBuilder<ExpenseTableController>(
-        init: controller..listData(),
-        builder: (controller) {
-          return RefreshIndicator(
-            onRefresh: () async => controller.listData(),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 5,
-                  ),
-                  child: Column(
-                    children: [
-                      // Row(
-                      //   children: [
-                      //     Expanded(
-                      //       child: DropdownButtonFormField<String>(
-                      //         value: controller.type.value,
-                      //         items: [
-                      //           ...Constant.dropdownType.map(
-                      //             (e) => DropdownMenuItem<String>(
-                      //               value: e,
-                      //               child: Text(e),
-                      //             ),
-                      //           )
-                      //         ],
-                      //         decoration:
-                      //             const InputDecoration(labelText: 'Tipe'),
-                      //         onChanged: (val) {
-                      //           controller.type.value = val!;
-                      //           controller.calculateDayInMonth();
-                      //           controller.update();
-                      //         },
-                      //       ),
-                      //     ),
-                      //     const SizedBox(width: 10),
-                      //     Expanded(
-                      //       child: DropdownButtonFormField<String>(
-                      //         value: controller.payment.value,
-                      //         items: [
-                      //           ...Constant.dropdownPayment.map(
-                      //             (e) => DropdownMenuItem<String>(
-                      //               value: e,
-                      //               child: Text(e),
-                      //             ),
-                      //           )
-                      //         ],
-                      //         decoration:
-                      //             const InputDecoration(labelText: 'Pembayaran'),
-                      //         onChanged: (val) {
-                      //           controller.payment.value = val!;
-                      //           controller.calculateDayInMonth();
-                      //           controller.update();
-                      //         },
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: controller.year.value,
-                              items: [
-                                ...controller.listYear.map(
-                                  (e) => DropdownMenuItem<String>(
-                                    value: e,
-                                    child: Text(e),
-                                  ),
-                                ),
-                              ],
-                              decoration: const InputDecoration(
-                                labelText: 'Tahun',
-                              ),
-                              onChanged: (val) {
-                                controller.year.value = val!;
-                                controller.listData();
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: controller.month.value,
-                              items: [
-                                ...Constant.dropdownMonthOnly.entries.map(
-                                  (e) => DropdownMenuItem<String>(
-                                    value: e.key,
-                                    child: Text(e.value),
-                                  ),
-                                ),
-                              ],
-                              decoration: const InputDecoration(
-                                labelText: 'Bulan',
-                              ),
-                              onChanged: (val) {
-                                controller.month.value = val!;
-                                controller.listData();
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Builder(
-                  builder: (context) {
-                    final mediaQuery = MediaQuery.sizeOf(context);
-                    final paymentList = Constant.dropdownPayment.sublist(1);
-                    return Obx(
-                      () => Wrap(
-                        alignment: WrapAlignment.spaceBetween,
-                        spacing: 5,
-                        children: paymentList
-                            .map(
-                              (e) => ChoiceChip(
-                                selectedColor: Colors.purple,
-                                label: SizedBox(
-                                  width:
-                                      mediaQuery.width / paymentList.length -
-                                      paymentList.length * 5,
-                                  child: Text(
-                                    e,
-                                    style: const TextStyle(color: Colors.white),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                selected: controller.selectedPayment.contains(
-                                  e,
-                                ),
-                                onSelected: (value) {
-                                  if (value) {
-                                    controller.selectedPayment.add(e);
-                                  } else {
-                                    controller.selectedPayment.remove(e);
-                                  }
-                                  controller.update();
-                                  controller.listData();
-                                },
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    );
+      body: RefreshIndicator(
+        onRefresh: () async => controller.listData(),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+              child: Obx(() {
+                final yearValue = controller.year.value;
+                final monthValue = controller.month.value;
+                return YearMonthFilter(
+                  yearValue: yearValue,
+                  monthValue: monthValue,
+                  listYear: controller.listYear,
+                  onChangedYear: (val) {
+                    controller.year.value = val!;
+                    controller.listData();
                   },
-                ),
-                Expanded(
-                  child: ListView(
-                    children: controller.tableItem.isEmpty
-                        ? [
-                            const SizedBox(height: 5),
-                            const Center(child: Text("Data tidak ditemukan")),
-                          ]
-                        : [
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Builder(
-                                builder: (context) {
-                                  final mediaQuery = MediaQuery.sizeOf(context);
-                                  return Container(
-                                    constraints: BoxConstraints(
-                                      minWidth: 700,
-                                      maxWidth: max(mediaQuery.width, 700),
-                                    ),
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: Table(
-                                      defaultVerticalAlignment:
-                                          TableCellVerticalAlignment.bottom,
-                                      columnWidths: const {
-                                        0: FlexColumnWidth(0.85),
-                                        1: FlexColumnWidth(1.5),
-                                        2: FlexColumnWidth(1.5),
-                                        3: FlexColumnWidth(1.5),
-                                        4: FlexColumnWidth(1.5),
-                                        5: FlexColumnWidth(1.5),
-                                      },
-                                      border: const TableBorder(
-                                        verticalInside: BorderSide(),
-                                        right: BorderSide(),
-                                        left: BorderSide(),
-                                      ),
-                                      children: [
-                                        const TableRow(
-                                          decoration: BoxDecoration(
-                                            border: Border.symmetric(
-                                              horizontal: BorderSide(),
-                                            ),
-                                            color: Colors.purple,
-                                          ),
-                                          children: [
-                                            TableText("Tanggal", isBold: true),
-                                            TableText("Nama", isBold: true),
-                                            TableText(
-                                              "Pemasukan",
-                                              isBold: true,
-                                            ),
-                                            TableText(
-                                              "Pengeluaran",
-                                              isBold: true,
-                                            ),
-                                            TableText(
-                                              "Total Pemasukan",
-                                              isBold: true,
-                                            ),
-                                            TableText(
-                                              "Total Pengeluaran",
-                                              isBold: true,
-                                            ),
-                                            TableText("Sisa", isBold: true),
-                                          ],
-                                        ),
-                                        ...List.generate(
-                                          controller.tableItem.length,
-                                          (index) => TableRow(
-                                            decoration: BoxDecoration(
-                                              border: BorderDirectional(
-                                                bottom:
-                                                    controller
-                                                        .tableItem[index]["isLast"]
-                                                    ? const BorderSide()
-                                                    : BorderSide.none,
-                                              ),
-                                            ),
-                                            children: [
-                                              TableText(
-                                                controller
-                                                    .tableItem[index]["day"],
-                                              ),
-                                              TableText(
-                                                controller
-                                                        .tableItem[index]["title"] ??
-                                                    "",
-                                                isDesc: true,
-                                              ),
-                                              TableText(
-                                                GF.rupiahFormat(
-                                                  controller
-                                                      .tableItem[index]["income"],
-                                                ),
-                                              ),
-                                              TableText(
-                                                GF.rupiahFormat(
-                                                  controller
-                                                      .tableItem[index]["outcome"],
-                                                ),
-                                              ),
-                                              TableText(
-                                                GF.rupiahFormat(
-                                                  controller
-                                                      .tableItem[index]["totalIncome"],
-                                                ),
-                                              ),
-                                              TableText(
-                                                GF.rupiahFormat(
-                                                  controller
-                                                      .tableItem[index]["totalOutcome"],
-                                                ),
-                                              ),
-                                              TableText(
-                                                GF.rupiahFormat(
-                                                  controller
-                                                      .tableItem[index]["totalSisa"],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 3,
-                  ),
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.add),
-                    onPressed: addExpense,
-                    label: const Text("Tambah"),
-                  ),
-                ),
-              ],
+                  onChangedMonth: (val) {
+                    controller.month.value = val!;
+                    controller.listData();
+                  },
+                );
+              }),
             ),
-          );
-        },
+            Obx(() {
+              List<String> selectedPayment = controller.selectedPayment();
+              return PaymentFilter(
+                isSelected: (e) => selectedPayment.contains(e),
+                onSelected: (value, e) {
+                  if (value) {
+                    controller.selectedPayment.add(e);
+                  } else {
+                    controller.selectedPayment.remove(e);
+                  }
+                  controller.listData();
+                },
+              );
+            }),
+            Expanded(
+              child: Obx(() {
+                final List<Map<String, dynamic>> tableItem =
+                    controller.tableItem;
+                if (tableItem.isEmpty) {
+                  return const Center(child: Text("Data tidak ditemukan"));
+                }
+                return ListView(
+                  children: [
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Builder(
+                        builder: (context) {
+                          final mediaQuery = MediaQuery.sizeOf(context);
+                          return Container(
+                            constraints: BoxConstraints(
+                              minWidth: 700,
+                              maxWidth: max(mediaQuery.width, 700),
+                            ),
+                            padding: const EdgeInsets.all(5.0),
+                            child: Table(
+                              defaultVerticalAlignment:
+                                  TableCellVerticalAlignment.bottom,
+                              columnWidths: const {
+                                0: FlexColumnWidth(0.85),
+                                1: FlexColumnWidth(1.5),
+                                2: FlexColumnWidth(1.5),
+                                3: FlexColumnWidth(1.5),
+                                4: FlexColumnWidth(1.5),
+                                5: FlexColumnWidth(1.5),
+                              },
+                              border: const TableBorder(
+                                verticalInside: BorderSide(),
+                                right: BorderSide(),
+                                left: BorderSide(),
+                              ),
+                              children: [
+                                const TableRow(
+                                  decoration: BoxDecoration(
+                                    border: Border.symmetric(
+                                      horizontal: BorderSide(),
+                                    ),
+                                    color: Colors.purple,
+                                  ),
+                                  children: [
+                                    TableText("Tanggal", isBold: true),
+                                    TableText("Nama", isBold: true),
+                                    TableText("Pemasukan", isBold: true),
+                                    TableText("Pengeluaran", isBold: true),
+                                    TableText("Total Pemasukan", isBold: true),
+                                    TableText(
+                                      "Total Pengeluaran",
+                                      isBold: true,
+                                    ),
+                                    TableText("Sisa", isBold: true),
+                                  ],
+                                ),
+                                ...List.generate(
+                                  tableItem.length,
+                                  (index) => TableRow(
+                                    decoration: BoxDecoration(
+                                      border: BorderDirectional(
+                                        bottom:
+                                            controller
+                                                .tableItem[index]["isLast"]
+                                            ? const BorderSide()
+                                            : BorderSide.none,
+                                      ),
+                                    ),
+                                    children: [
+                                      TableText(
+                                        controller.tableItem[index]["day"],
+                                      ),
+                                      TableText(
+                                        controller.tableItem[index]["title"] ??
+                                            "",
+                                        isDesc: true,
+                                      ),
+                                      TableText(
+                                        GF.rupiahFormat(
+                                          controller.tableItem[index]["income"],
+                                        ),
+                                      ),
+                                      TableText(
+                                        GF.rupiahFormat(
+                                          controller
+                                              .tableItem[index]["outcome"],
+                                        ),
+                                      ),
+                                      TableText(
+                                        GF.rupiahFormat(
+                                          controller
+                                              .tableItem[index]["totalIncome"],
+                                        ),
+                                      ),
+                                      TableText(
+                                        GF.rupiahFormat(
+                                          controller
+                                              .tableItem[index]["totalOutcome"],
+                                        ),
+                                      ),
+                                      TableText(
+                                        GF.rupiahFormat(
+                                          controller
+                                              .tableItem[index]["totalSisa"],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                onPressed: addExpense,
+                label: const Text("Tambah"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
