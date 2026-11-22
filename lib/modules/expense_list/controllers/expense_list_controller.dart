@@ -33,6 +33,12 @@ class ExpenseListController extends ExpenseBaseController {
     );
   }
 
+  @override
+  void onReady() {
+    super.onReady();
+    listData();
+  }
+
   void listData() async {
     listExpense.value = await expenseService.fetchListFilterData(
       mode.value == "Outcome",

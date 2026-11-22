@@ -8,12 +8,39 @@ import '../../../utils/constant.dart';
 import '../../../utils/global_functions.dart';
 import '../controllers/expense_add_controller.dart';
 
-class ExpenseAddView extends GetView<ExpenseAddController> {
-  static final _formKey = GlobalKey<FormState>();
-
+class ExpenseAddView extends StatefulWidget {
   const ExpenseAddView({super.key});
 
-  void _submitData(BuildContext context) async {
+  @override
+  State<ExpenseAddView> createState() => _ExpenseAddViewState();
+}
+
+class _ExpenseAddViewState extends State<ExpenseAddView> {
+  final _formKey = GlobalKey<FormState>();
+
+  late final ExpenseAddController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(ExpenseAddController());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller.checkArguments(ModalRoute.of(context)?.settings.arguments);
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<ExpenseAddController>()) {
+      Get.delete<ExpenseAddController>();
+    }
+    super.dispose();
+  }
+
+  void _submitData() async {
     if (controller.amountController.text.isEmpty) {
       return;
     }
@@ -28,40 +55,37 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
       isEdit: controller.id.isNotEmpty,
     );
     if (add) {
-      controller.insertData().whenComplete(() {
-        if (context.mounted) {
-          Navigator.pop(context);
-        }
-      });
+      await controller.insertData();
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
   void _presentDatePicker(BuildContext context) {
     showDatePicker(
       context: context,
-      initialDate: controller.selectedDate,
+      initialDate: controller.selectedDate.value,
       firstDate: DateTime(2022),
       lastDate: DateTime.now(),
     ).then((pickedDate) {
       if (pickedDate == null) {
         return;
       }
-      controller.selectedDate = pickedDate;
-      controller.update();
+      controller.selectedDate.value = pickedDate;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    controller.checkArguments(ModalRoute.of(context)?.settings.arguments);
-    return GetBuilder<ExpenseAddController>(
-      builder: (controller) => SingleChildScrollView(
-        child: Card(
-          child: Form(
-            key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
+    return SingleChildScrollView(
+      child: Card(
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Obx(
+              () => Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: !controller.isExpense.value
@@ -77,13 +101,14 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                               ),
                             ),
                           ],
-                          decoration: const InputDecoration(labelText: 'Kategori'),
+                          decoration: const InputDecoration(
+                            labelText: 'Kategori',
+                          ),
                           onChanged: (val) {
                             controller.typeValue.value = val!;
                           },
                           onSaved: (newValue) {
                             controller.typeValue.value = "Pemasukan";
-                            controller.update();
                           },
                         ),
                         TextField(
@@ -103,21 +128,19 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                         DropdownButtonFormField<String>(
                           initialValue: controller.incomeFromValue.value,
                           items: [
-                            ...[
-                              ...List<String>.from(Constant.dropdownPayment),
-                            ].map(
-                              (e) => DropdownMenuItem<String>(
-                                value: e,
-                                child: Text(e),
-                              ),
-                            ),
+                            ...[...List<String>.from(Constant.dropdownPayment)]
+                                .map(
+                                  (e) => DropdownMenuItem<String>(
+                                    value: e,
+                                    child: Text(e),
+                                  ),
+                                ),
                           ],
                           decoration: const InputDecoration(
                             labelText: 'Sumber',
                           ),
                           onChanged: (val) {
                             controller.incomeFromValue.value = val!;
-                            controller.update();
                           },
                         ),
                         SizedBox(
@@ -126,7 +149,7 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                             children: <Widget>[
                               Expanded(
                                 child: Text(
-                                  'Tanggal: ${DateFormat.yMd().format(controller.selectedDate)}',
+                                  'Tanggal: ${DateFormat.yMd().format(controller.selectedDate.value)}',
                                 ),
                               ),
                               TextButton(
@@ -142,9 +165,13 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                           ),
                         ),
                         ElevatedButton(
-                          child: const Text('Tambah'),
+                          child: Obx(
+                            () => Text(
+                              controller.id.isNotEmpty ? 'Ubah' : 'Tambah',
+                            ),
+                          ),
                           onPressed: () {
-                            _submitData(context);
+                            _submitData();
                           },
                         ),
                       ]
@@ -160,10 +187,11 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                               ),
                             ),
                           ],
-                          decoration: const InputDecoration(labelText: 'Kategori'),
+                          decoration: const InputDecoration(
+                            labelText: 'Kategori',
+                          ),
                           onChanged: (val) {
                             controller.typeValue.value = val!;
-                            controller.update();
                           },
                         ),
                         TextField(
@@ -210,7 +238,6 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                           ),
                           onChanged: (val) {
                             controller.paymentValue.value = val!;
-                            controller.update();
                           },
                         ),
                         SizedBox(
@@ -219,7 +246,7 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                             children: <Widget>[
                               Expanded(
                                 child: Text(
-                                  'Tanggal: ${DateFormat.yMd().format(controller.selectedDate)}',
+                                  'Tanggal: ${DateFormat.yMd().format(controller.selectedDate.value)}',
                                 ),
                               ),
                               TextButton(
@@ -235,9 +262,13 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
                           ),
                         ),
                         ElevatedButton(
-                          child: const Text('Tambah'),
+                          child: Obx(
+                            () => Text(
+                              controller.id.isNotEmpty ? 'Ubah' : 'Tambah',
+                            ),
+                          ),
                           onPressed: () {
-                            _submitData(context);
+                            _submitData();
                           },
                         ),
                       ],
@@ -250,45 +281,32 @@ class ExpenseAddView extends GetView<ExpenseAddController> {
   }
 
   Widget switchButton() {
-    return GetBuilder<ExpenseAddController>(
-      builder: (controller) => Row(
+    return Obx(() {
+      final isExpense = controller.isExpense.value;
+      return Row(
         children: [
-          Expanded(
-            child: tabButton(
-              controller,
-              controller.isExpense.value,
-              "Pengeluaran",
-            ),
-          ),
+          Expanded(child: tabButton(isExpense, "Pengeluaran")),
           const SizedBox(width: 10),
-          Expanded(
-            child: tabButton(
-              controller,
-              !controller.isExpense.value,
-              "Pemasukan",
-            ),
-          ),
+          Expanded(child: tabButton(!isExpense, "Pemasukan")),
         ],
-      ),
-    );
+      );
+    });
   }
 
-  Widget tabButton(
-    ExpenseAddController controller,
-    bool isActive,
-    String text,
-  ) {
+  Widget tabButton(bool isActive, String text) {
     if (isActive) {
       return ElevatedButton(onPressed: () {}, child: Text(text));
     }
-    return OutlinedButton(
-      onPressed: controller.id() == ""
-          ? () {
-              controller.isExpense.toggle();
-              controller.update();
-            }
-          : null,
-      child: Text(text),
-    );
+    return Obx(() {
+      final id = controller.id();
+      return OutlinedButton(
+        onPressed: id == ""
+            ? () {
+                controller.isExpense.toggle();
+              }
+            : null,
+        child: Text(text),
+      );
+    });
   }
 }

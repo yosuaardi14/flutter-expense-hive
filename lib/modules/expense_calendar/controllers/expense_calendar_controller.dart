@@ -38,7 +38,6 @@ class ExpenseCalendarController extends ExpenseBaseController {
 
   @override
   void onReady() {
-    // update();
     listData();
   }
 

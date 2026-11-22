@@ -1,8 +1,9 @@
-import 'package:flutter_expense_app/models/budget.dart';
-import 'package:flutter_expense_app/modules/base/controllers/expense_base_controller.dart';
-import 'package:flutter_expense_app/modules/budget_add/controllers/budget_add_controller.dart';
-import 'package:flutter_expense_app/modules/budget_add/views/budget_add_view.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../models/budget.dart';
+import '../../base/controllers/expense_base_controller.dart';
+import '../../budget_add/views/budget_add_view.dart';
 
 class BudgetListController extends ExpenseBaseController {
   final currentListBudget = <Budget>[].obs;
@@ -21,45 +22,43 @@ class BudgetListController extends ExpenseBaseController {
       (index) => (2020 + index).toString(),
     );
     listYear.value = listYear.reversed.toList();
-    listData();
   }
 
   @override
   void onReady() {
-    update();
+    listData();
   }
 
   void listData() async {
-    showLoading();
-
     currentListBudget.value = await budgetService.fetchListFilterDataBudget(
       null,
       null,
       int.tryParse(month.value),
       int.tryParse(year.value),
     );
-    update();
-
-    hideLoading();
   }
 
   void addBudget({String? category}) {
-    Get.put(BudgetAddController()).checkArguments({
-      "category": category,
-      "year": year.value,
-      "month": month.value,
-    });
-    Get.bottomSheet(const BudgetAddView()).whenComplete(() {
+    Get.bottomSheet(
+      const BudgetAddView(),
+      settings: RouteSettings(
+        arguments: {
+          "category": category,
+          "year": year.value,
+          "month": month.value,
+        },
+      ),
+    ).whenComplete(() {
       listData();
-      Get.delete<BudgetAddController>();
     });
   }
 
   void editBudget(Budget budget) {
-    Get.put(BudgetAddController()).checkArguments(budget.parentid ?? budget.id);
-    Get.bottomSheet(const BudgetAddView()).whenComplete(() {
+    Get.bottomSheet(
+      const BudgetAddView(),
+      settings: RouteSettings(arguments: budget.parentid ?? budget.id),
+    ).whenComplete(() {
       listData();
-      Get.delete<BudgetAddController>();
     });
   }
 

@@ -5,16 +5,16 @@ class YearMonthFilter extends StatelessWidget {
   final String yearValue;
   final String monthValue;
   final List<String> listYear;
-  final void Function(String? value) onChangedYear;
-  final void Function(String? value) onChangedMonth;
+  final void Function(String? value)? onChangedYear;
+  final void Function(String? value)? onChangedMonth;
 
   const YearMonthFilter({
     super.key,
     required this.yearValue,
     required this.monthValue,
     required this.listYear,
-    required this.onChangedYear,
-    required this.onChangedMonth,
+    this.onChangedYear,
+    this.onChangedMonth,
   });
 
   @override

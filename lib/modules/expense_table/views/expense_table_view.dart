@@ -8,7 +8,6 @@ import '../../base/widgets/base_app_bar.dart';
 import '../../base/widgets/base_drawer.dart';
 import '../../base/widgets/payment_filter.dart';
 import '../../base/widgets/year_month_filter.dart';
-import '../../expense_add/controllers/expense_add_controller.dart';
 import '../../expense_add/views/expense_add_view.dart';
 import '../controllers/expense_table_controller.dart';
 
@@ -16,7 +15,7 @@ class ExpenseTableView extends GetView<ExpenseTableController> {
   const ExpenseTableView({super.key});
 
   void addExpense() {
-    Get.put(ExpenseAddController()).resetForm();
+    // Get.put(ExpenseAddController()).resetForm();
     Get.bottomSheet(const ExpenseAddView()).then((value) {
       controller.listData();
     });

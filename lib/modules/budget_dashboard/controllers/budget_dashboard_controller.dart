@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_expense_app/models/budget.dart';
-import 'package:flutter_expense_app/models/expense.dart';
-import 'package:flutter_expense_app/modules/base/controllers/expense_base_controller.dart';
-import 'package:flutter_expense_app/utils/constant.dart';
-import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:get/get.dart';
+
+import '../../../models/budget.dart';
+import '../../../models/expense.dart';
+import '../../../utils/constant.dart';
+import '../../../utils/global_functions.dart';
+import '../../base/controllers/expense_base_controller.dart';
 
 class BudgetDashboardController extends ExpenseBaseController {
   final currentListBudget = <Budget>[].obs;

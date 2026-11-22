@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_expense_app/models/budget.dart';
-import 'package:flutter_expense_app/modules/base/widgets/base_drawer.dart';
-import 'package:flutter_expense_app/modules/budget_list/controllers/budget_list_controller.dart';
-import 'package:flutter_expense_app/utils/constant.dart';
-import 'package:flutter_expense_app/utils/global_functions.dart';
 import 'package:get/get.dart';
 
+import '../../../models/budget.dart';
+import '../../../utils/constant.dart';
+import '../../../utils/global_functions.dart';
 import '../../base/widgets/base_app_bar.dart';
+import '../../base/widgets/base_drawer.dart';
+import '../../base/widgets/year_month_filter.dart';
+import '../controllers/budget_list_controller.dart';
 
 class BudgetListView extends GetView<BudgetListController> {
   const BudgetListView({super.key});
@@ -29,62 +30,27 @@ class BudgetListView extends GetView<BudgetListController> {
           ],
         ),
         drawer: const BaseDrawer(),
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: controller.addBudget,
-        //   child: const Icon(Icons.add),
-        // ),
-        // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         body: Column(
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Obx(
-                      () => DropdownButtonFormField<String>(
-                        initialValue: controller.year.value,
-                        items: [
-                          ...controller.listYear.map(
-                            (e) => DropdownMenuItem<String>(
-                              value: e,
-                              child: Text(e),
-                            ),
-                          ),
-                        ],
-                        decoration: const InputDecoration(labelText: 'Tahun'),
-                        onChanged: (val) {
-                          controller.year.value = val!;
-                          controller.update();
-                          controller.listData();
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Obx(
-                      () => DropdownButtonFormField<String>(
-                        initialValue: controller.month.value,
-                        items: [
-                          ...Constant.dropdownMonthOnly.entries.map(
-                            (e) => DropdownMenuItem<String>(
-                              value: e.key,
-                              child: Text(e.value),
-                            ),
-                          ),
-                        ],
-                        decoration: const InputDecoration(labelText: 'Bulan'),
-                        onChanged: (val) {
-                          controller.month.value = val!;
-                          controller.update();
-                          controller.listData();
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              child: Obx(() {
+                final yearValue = controller.year.value;
+                final monthValue = controller.month.value;
+                return YearMonthFilter(
+                  yearValue: yearValue,
+                  monthValue: monthValue,
+                  listYear: controller.listYear,
+                  onChangedYear: (val) {
+                    controller.year.value = val!;
+                    controller.listData();
+                  },
+                  onChangedMonth: (val) {
+                    controller.month.value = val!;
+                    controller.listData();
+                  },
+                );
+              }),
             ),
             Expanded(
               child: Obx(() {
@@ -182,15 +148,6 @@ class BudgetListView extends GetView<BudgetListController> {
                 );
               }),
             ),
-            // Container(
-            //   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-            //   width: double.infinity,
-            //   child: ElevatedButton.icon(
-            //     icon: const Icon(Icons.add),
-            //     onPressed: controller.addBudget,
-            //     label: const Text("Tambah"),
-            //   ),
-            // ),
           ],
         ),
       ),

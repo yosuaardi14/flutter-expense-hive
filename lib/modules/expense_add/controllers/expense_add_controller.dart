@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_expense_app/utils/constant.dart';
 import 'package:get/get.dart';
 
 import '../../../models/expense.dart';
+import '../../../utils/constant.dart';
 import '../../base/controllers/expense_base_controller.dart';
 
 class ExpenseAddController extends ExpenseBaseController {
@@ -11,14 +11,21 @@ class ExpenseAddController extends ExpenseBaseController {
   Rx<String> typeValue = "Makan".obs;
   Rx<String> paymentValue = "Tunai".obs;
   Rx<String> incomeFromValue = "Bank".obs;
-  DateTime selectedDate = DateTime.now();
+  Rx<DateTime> selectedDate = DateTime.now().obs;
   final isExpense = true.obs;
   final id = "".obs;
 
   Future<void> checkArguments(dynamic args) async {
-    if (args != null && id.value != args) {
-      detailData(args);
+    if (args is Map) {
+      if (args["id"] != null) {
+        detailData(args["id"]);
+      } else if (args["isExpense"] is bool) {
+        isExpense(args["isExpense"] ?? true);
+      }
     }
+    // if (args != null && id.value != args) {
+    //   detailData(args);
+    // }
   }
 
   Future<void> insertData() async {
@@ -33,8 +40,7 @@ class ExpenseAddController extends ExpenseBaseController {
       };
       await expenseService.deleteData(id.value);
       await expenseService.insertData(data);
-      resetForm();
-      update();
+      // resetForm();
     } else {
       Map<String, dynamic> data = {
         "title": titleController.text,
@@ -45,8 +51,7 @@ class ExpenseAddController extends ExpenseBaseController {
         "id": DateTime.now().toString(),
       };
       await expenseService.insertData(data);
-      resetForm();
-      update();
+      // resetForm();
     }
   }
 
@@ -56,7 +61,6 @@ class ExpenseAddController extends ExpenseBaseController {
       return;
     }
     isExpense.value = data.type != "Pemasukan";
-    update();
     titleController.text = data.title;
     amountController.text = data.amount.toString().replaceAll(".0", "");
     typeValue.value = data.type;
@@ -65,9 +69,8 @@ class ExpenseAddController extends ExpenseBaseController {
     } else {
       incomeFromValue.value = data.payment;
     }
-    selectedDate = data.date;
+    selectedDate.value = data.date;
     this.id(id);
-    update();
   }
 
   Future<void> updateData(String id) async {
@@ -76,19 +79,25 @@ class ExpenseAddController extends ExpenseBaseController {
       "amount": amountController.text,
       "type": isExpense.value ? typeValue : "Pemasukan",
       "payment": isExpense.value ? paymentValue : incomeFromValue,
-      "date": selectedDate.toString(),
+      "date": selectedDate.value.toString(),
       "id": DateTime.now().toString(),
     };
     // await dbService.deleteData(id);
     await expenseService.updateData(id, data);
-    resetForm();
-    update();
+    // resetForm();
+  }
+
+  @override
+  void onClose() {
+    titleController.dispose();
+    amountController.dispose();
+    super.onClose();
   }
 
   void resetForm([bool isExpense = true]) {
     titleController.clear();
     amountController.clear();
-    selectedDate = DateTime.now();
+    selectedDate.value = DateTime.now();
     id("");
     this.isExpense(isExpense);
     if (isExpense) {
@@ -96,6 +105,5 @@ class ExpenseAddController extends ExpenseBaseController {
     } else {
       typeValue.value = "Pemasukan";
     }
-    update();
   }
 }

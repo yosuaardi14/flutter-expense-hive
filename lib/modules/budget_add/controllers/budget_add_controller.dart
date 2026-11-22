@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_expense_app/models/budget.dart';
-import 'package:flutter_expense_app/utils/constant.dart';
 import 'package:get/get.dart';
 
+import '../../../models/budget.dart';
+import '../../../utils/constant.dart';
 import '../../base/controllers/expense_base_controller.dart';
 
 class BudgetAddController extends ExpenseBaseController {
@@ -57,7 +57,6 @@ class BudgetAddController extends ExpenseBaseController {
     int startWeekDay = selected.weekday - 1;
     int weeks = ((startWeekDay + totalDays) / 7).ceil();
     weekList.value = List.generate(weeks, (index) => (index + 1));
-    update();
   }
 
   Future<void> checkArguments(dynamic args) async {
@@ -67,7 +66,6 @@ class BudgetAddController extends ExpenseBaseController {
           args["month"]?.toString() ?? DateTime.now().month.toString();
       year.value = args["year"]?.toString() ?? DateTime.now().year.toString();
       generateWeekList();
-      update();
     } else if (args != null && id.value != args) {
       detailData(args);
     }
@@ -132,8 +130,7 @@ class BudgetAddController extends ExpenseBaseController {
           }
         }
       }
-      resetForm();
-      update();
+      // resetForm();
     } else {
       String parentid = "${typeValue.value}_${month.value}_${year.value}_0";
       Map<String, dynamic> data = {
@@ -187,8 +184,7 @@ class BudgetAddController extends ExpenseBaseController {
           }
         }
       }
-      resetForm();
-      update();
+      // resetForm();
     }
   }
 
@@ -227,12 +223,19 @@ class BudgetAddController extends ExpenseBaseController {
       }
     }
     this.id(id);
-    update();
   }
 
-  void resetForm([bool isExpense = true]) {
+  @override
+  void onClose() {
+    amountController.dispose();
+    for (var controller in amountsChildrenController) {
+      controller.dispose();
+    }
+    super.onClose();
+  }
+
+  void resetForm() {
     amountController.clear();
     id("");
-    update();
   }
 }

@@ -10,7 +10,6 @@ import '../../base/widgets/base_drawer.dart';
 import '../../base/widgets/mode_type_filter.dart';
 import '../../base/widgets/payment_filter.dart';
 import '../../base/widgets/year_month_filter.dart';
-import '../../expense_add/controllers/expense_add_controller.dart';
 import '../../expense_add/views/expense_add_view.dart';
 import '../controllers/expense_list_controller.dart';
 
@@ -18,9 +17,14 @@ class ExpenseListView extends GetView<ExpenseListController> {
   const ExpenseListView({super.key});
 
   void addExpense() {
-    Get.put(ExpenseAddController())
-        .resetForm(controller.mode.value == "Outcome");
-    Get.bottomSheet(const ExpenseAddView()).then((value) {
+    // Get.put(ExpenseAddController())
+    //     .resetForm(controller.mode.value == "Outcome");
+    Get.bottomSheet(
+      const ExpenseAddView(),
+      settings: RouteSettings(
+        arguments: {"isExpense": controller.mode.value == "Outcome"},
+      ),
+    ).then((value) {
       controller.listData();
     });
   }
@@ -235,10 +239,10 @@ class ItemData extends GetView<ExpenseListController> {
   const ItemData({super.key, required this.data});
 
   void editData() {
-    Get.put(ExpenseAddController());
+    // Get.put(ExpenseAddController());
     Get.bottomSheet(
       const ExpenseAddView(),
-      settings: RouteSettings(arguments: data.id),
+      settings: RouteSettings(arguments: {"id": data.id}),
     ).then((value) {
       controller.listData();
     });
